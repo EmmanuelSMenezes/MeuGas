@@ -1,0 +1,22 @@
+FROM node:lts as dependencies
+WORKDIR /app
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
+FROM node:lts as runner
+WORKDIR /app
+ENV NODE_ENV production
+
+# Copiar dependências
+COPY --from=dependencies /app/node_modules ./node_modules
+COPY package.json ./
+
+# Copiar arquivos de configuração
+COPY next.config.js ./
+COPY public ./public
+
+# Copiar o build já pronto (da pasta local)
+COPY .next ./.next
+
+EXPOSE 3000
+CMD ["yarn", "start"]

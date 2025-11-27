@@ -1,0 +1,248 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # MICROSERVICOS .NET - Portas 9001-9012
+  # ========================================
+  
+  ms-authentication:
+    build:
+      context: ./MS_Authentication
+      dockerfile: Dockerfile
+    container_name: pam-ms-authentication
+    ports:
+      - "9001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-consumer:
+    build:
+      context: ./MS_Consumer
+      dockerfile: Dockerfile
+    container_name: pam-ms-consumer
+    ports:
+      - "9002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-partner:
+    build:
+      context: ./MS_Partner
+      dockerfile: Dockerfile
+    container_name: pam-ms-partner
+    ports:
+      - "9003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-catalog:
+    build:
+      context: ./MS_Catalog
+      dockerfile: Dockerfile
+    container_name: pam-ms-catalog
+    ports:
+      - "9004:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-order:
+    build:
+      context: ./MS_Order
+      dockerfile: Dockerfile
+    container_name: pam-ms-order
+    ports:
+      - "9005:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-billing:
+    build:
+      context: ./MS_Billing
+      dockerfile: Dockerfile
+    container_name: pam-ms-billing
+    ports:
+      - "9006:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-logistics:
+    build:
+      context: ./MS_Logistics
+      dockerfile: Dockerfile
+    container_name: pam-ms-logistics
+    ports:
+      - "9007:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-communication:
+    build:
+      context: ./MS_Communication
+      dockerfile: Dockerfile
+    container_name: pam-ms-communication
+    ports:
+      - "9008:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+    depends_on:
+      - rabbitmq
+
+  ms-report:
+    build:
+      context: ./MS_Report
+      dockerfile: Dockerfile
+    container_name: pam-ms-report
+    ports:
+      - "9009:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-storage:
+    build:
+      context: ./MS_Storage
+      dockerfile: Dockerfile
+    container_name: pam-ms-storage
+    ports:
+      - "9010:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-reputation:
+    build:
+      context: ./MS_Reputation
+      dockerfile: Dockerfile
+    container_name: pam-ms-reputation
+    ports:
+      - "9011:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  ms-offer:
+    build:
+      context: ./MS_Offer
+      dockerfile: Dockerfile
+    container_name: pam-ms-offer
+    ports:
+      - "9012:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    networks:
+      - pam-network
+    restart: unless-stopped
+
+  # ========================================
+  # RABBITMQ - Porta 9015 (AMQP) e 9016 (Management UI)
+  # ========================================
+
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: pam-rabbitmq
+    ports:
+      - "9015:5672"   # AMQP protocol
+      - "9016:15672"  # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=pam_user
+      - RABBITMQ_DEFAULT_PASS=pam_password_2024
+      - RABBITMQ_DEFAULT_VHOST=/
+    networks:
+      - pam-network
+    restart: unless-stopped
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================
+  # APLICACOES WEB - Portas 9026, 9028
+  # ========================================
+
+  admin-web:
+    build:
+      context: ./PAM_AdminWeb
+      dockerfile: Dockerfile
+    container_name: pam-admin-web
+    ports:
+      - "9026:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    networks:
+      - pam-network
+    restart: unless-stopped
+    depends_on:
+      - ms-authentication
+      - ms-consumer
+      - ms-partner
+
+  partner-web:
+    build:
+      context: ./PAM_PartnerWeb
+      dockerfile: Dockerfile
+    container_name: pam-partner-web
+    ports:
+      - "9028:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    networks:
+      - pam-network
+    restart: unless-stopped
+    depends_on:
+      - ms-authentication
+      - ms-partner
+
+networks:
+  pam-network:
+    driver: bridge
+
+volumes:
+  pam-data:
+  rabbitmq-data:

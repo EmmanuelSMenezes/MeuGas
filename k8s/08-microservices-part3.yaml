@@ -1,0 +1,176 @@
+﻿# MS Offer
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-offer
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-offer
+  template:
+    metadata:
+      labels:
+        app: ms-offer
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-offer
+        image: registry.digitalocean.com/botpaporegistry/ms-offer:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: pam-config
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        - name: RabbitMQ__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-offer
+  namespace: pam
+spec:
+  selector:
+    app: ms-offer
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# MS Order
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-order
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-order
+  template:
+    metadata:
+      labels:
+        app: ms-order
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-order
+        image: registry.digitalocean.com/botpaporegistry/ms-order:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: pam-config
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        - name: RabbitMQ__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-order
+  namespace: pam
+spec:
+  selector:
+    app: ms-order
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# MS Partner
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-partner
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-partner
+  template:
+    metadata:
+      labels:
+        app: ms-partner
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-partner
+        image: registry.digitalocean.com/botpaporegistry/ms-partner:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: pam-config
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        - name: RabbitMQ__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-partner
+  namespace: pam
+spec:
+  selector:
+    app: ms-partner
+  ports:
+  - port: 80
+    targetPort: 80
+
+
+

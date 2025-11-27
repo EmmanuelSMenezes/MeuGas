@@ -1,0 +1,177 @@
+﻿# MS Report
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-report
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-report
+  template:
+    metadata:
+      labels:
+        app: ms-report
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-report
+        image: registry.digitalocean.com/botpaporegistry/ms-report:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: pam-config
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        - name: RabbitMQ__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-report
+  namespace: pam
+spec:
+  selector:
+    app: ms-report
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# MS Reputation
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-reputation
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-reputation
+  template:
+    metadata:
+      labels:
+        app: ms-reputation
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-reputation
+        image: registry.digitalocean.com/botpaporegistry/ms-reputation:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: pam-config
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        - name: RabbitMQ__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-reputation
+  namespace: pam
+spec:
+  selector:
+    app: ms-reputation
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# MS Storage
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-storage
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-storage
+  template:
+    metadata:
+      labels:
+        app: ms-storage
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-storage
+        image: registry.digitalocean.com/botpaporegistry/ms-storage:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: pam-config
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        - name: RabbitMQ__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-storage
+  namespace: pam
+spec:
+  selector:
+    app: ms-storage
+  ports:
+  - port: 80
+    targetPort: 80
+
+
+
+

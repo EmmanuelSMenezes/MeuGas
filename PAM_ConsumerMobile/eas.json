@@ -1,0 +1,45 @@
+{
+  "cli": {
+    "version": ">= 3.9.2"
+  },
+  "build": {
+    "development": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {},
+      "channel": "development"
+    },
+    "qa": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {},
+      "channel": "qa"
+    },
+    "preview": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {},
+      "channel": "preview"
+    },
+    "production": {
+      "developmentClient": false,
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {},
+      "channel": "production"
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

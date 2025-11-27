@@ -1,0 +1,31 @@
+# Build Stage
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+WORKDIR /app
+COPY . .
+
+# Restore dependencies
+RUN dotnet restore
+
+# Build and publish
+RUN dotnet publish WebApi/WebApi.csproj --self-contained false -c Release -o /build
+
+# Runtime Stage
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
+
+WORKDIR /app
+COPY --from=build /build .
+
+# Create log directory
+RUN mkdir -p /var/log/microservice
+
+# Expose port 80
+EXPOSE 80
+
+# Set environment variables (will be overridden by docker-compose)
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:80
+
+# Entry point will be determined by the executable name
+# This will be overridden in each specific Dockerfile
+ENTRYPOINT ["dotnet", "WebApi.dll"]

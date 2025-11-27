@@ -1,0 +1,148 @@
+﻿# Admin Web
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-web
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-web
+  template:
+    metadata:
+      labels:
+        app: admin-web
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: admin-web
+        image: registry.digitalocean.com/botpaporegistry/admin-web:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        # URLs dos microserviços via Ingress (api.meugas.app)
+        - name: NEXT_APP_URL_MS_AUTH
+          value: "http://api.meugas.app/authentication"
+        - name: NEXT_APP_URL_MS_PARTNER
+          value: "http://api.meugas.app/partner"
+        - name: NEXT_APP_URL_MS_CATALOG
+          value: "http://api.meugas.app/catalog"
+        - name: NEXT_APP_URL_MS_COMMUNICATION
+          value: "http://api.meugas.app/communication"
+        - name: NEXT_APP_URL_MS_ORDER
+          value: "http://api.meugas.app/order"
+        - name: NEXT_APP_URL_MS_CONSUMER
+          value: "http://api.meugas.app/consumer"
+        - name: NEXT_APP_URL_MS_BILLING
+          value: "http://api.meugas.app/billing"
+        - name: NEXT_APP_GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: google-api-key
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-web
+  namespace: pam
+spec:
+  selector:
+    app: admin-web
+  ports:
+  - port: 80
+    targetPort: 3000
+---
+# Partner Web
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: partner-web
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: partner-web
+  template:
+    metadata:
+      labels:
+        app: partner-web
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: partner-web
+        image: registry.digitalocean.com/botpaporegistry/partner-web:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        # URLs dos microserviços via Ingress (api.meugas.app)
+        - name: NEXT_APP_URL_MS_AUTH
+          value: "http://api.meugas.app/authentication"
+        - name: NEXT_APP_URL_MS_PARTNER
+          value: "http://api.meugas.app/partner"
+        - name: NEXT_APP_URL_MS_CATALOG
+          value: "http://api.meugas.app/catalog"
+        - name: NEXT_APP_URL_MS_LOGISTICS
+          value: "http://api.meugas.app/logistics"
+        - name: NEXT_APP_URL_MS_BILLING
+          value: "http://api.meugas.app/billing"
+        - name: NEXT_APP_URL_MS_ORDER
+          value: "http://api.meugas.app/order"
+        - name: NEXT_APP_URL_MS_COMMUNICATION
+          value: "http://api.meugas.app/communication"
+        - name: NEXT_APP_GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: google-api-key
+        - name: NEXT_APP_PAGSEGURO_CONNECT_URL
+          value: "https://connect.pagseguro.uol.com.br"
+        - name: NEXT_APP_PAGSEGURO_CONNECT_SCOPE
+          value: "payments.read,payments.create"
+        - name: NEXT_APP_PAGSEGURO_CONNECT_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: pagseguro-client-id
+        - name: NEXT_APP_PAGSEGURO_REDIRECT_URL
+          value: "http://parceiro.meugas.app/dashboard/billing"
+        - name: NODE_ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: partner-web
+  namespace: pam
+spec:
+  selector:
+    app: partner-web
+  ports:
+  - port: 80
+    targetPort: 3000
+
+
+
+

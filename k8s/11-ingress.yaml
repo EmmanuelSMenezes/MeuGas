@@ -1,0 +1,185 @@
+# Ingress para Frontends (sem regex/rewrite)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pam-ingress-frontends
+  namespace: pam
+  annotations:
+    # Cloudflare vai gerenciar SSL - deixar HTTP no backend
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+  # Landing Page
+  - host: meugas.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: landing-page
+            port:
+              number: 80
+  - host: www.meugas.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: landing-page
+            port:
+              number: 80
+  # Admin Web
+  - host: administrador.meugas.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: admin-web
+            port:
+              number: 80
+  # Partner Web
+  - host: parceiro.meugas.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: partner-web
+            port:
+              number: 80
+  # MinIO Console
+  - host: minio.meugas.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: minio-service
+            port:
+              number: 9001
+  # MinIO API
+  - host: storage.meugas.app
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: minio-service
+            port:
+              number: 9000
+---
+# Ingress para API Gateway (com regex/rewrite)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pam-ingress-api
+  namespace: pam
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://administrador.meugas.app,https://parceiro.meugas.app"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,x-signalr-user-agent"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-max-age: "86400"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: api.meugas.app
+    http:
+      paths:
+      - path: /authentication(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-authentication
+            port:
+              number: 80
+      - path: /billing(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-billing
+            port:
+              number: 80
+      - path: /catalog(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-catalog
+            port:
+              number: 80
+      - path: /communication(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-communication
+            port:
+              number: 80
+      - path: /consumer(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-consumer
+            port:
+              number: 80
+      - path: /logistics(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-logistics
+            port:
+              number: 80
+      - path: /offer(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-offer
+            port:
+              number: 80
+      - path: /order(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-order
+            port:
+              number: 80
+      - path: /partner(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-partner
+            port:
+              number: 80
+      - path: /report(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-report
+            port:
+              number: 80
+      - path: /reputation(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-reputation
+            port:
+              number: 80
+      - path: /storage(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: ms-storage
+            port:
+              number: 80
+

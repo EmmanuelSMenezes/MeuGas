@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pam-config
+  namespace: pam
+data:
+  # Configurações gerais
+  ASPNETCORE_ENVIRONMENT: "Production"
+  TZ: "America/Sao_Paulo"
+  
+  # URLs dos microserviços (para comunicação interna)
+  MS_AUTHENTICATION_URL: "http://ms-authentication:80"
+  MS_BILLING_URL: "http://ms-billing:80"
+  MS_CATALOG_URL: "http://ms-catalog:80"
+  MS_COMMUNICATION_URL: "http://ms-communication:80"
+  MS_CONSUMER_URL: "http://ms-consumer:80"
+  MS_LOGISTICS_URL: "http://ms-logistics:80"
+  MS_OFFER_URL: "http://ms-offer:80"
+  MS_ORDER_URL: "http://ms-order:80"
+  MS_PARTNER_URL: "http://ms-partner:80"
+  MS_REPORT_URL: "http://ms-report:80"
+  MS_REPUTATION_URL: "http://ms-reputation:80"
+  MS_STORAGE_URL: "http://ms-storage:80"
+  
+  # RabbitMQ
+  RABBITMQ_HOST: "rabbitmq-service"
+  RABBITMQ_PORT: "5672"
+  
+  # PostgreSQL
+  POSTGRES_HOST: "postgres-service"
+  POSTGRES_PORT: "5432"
+
+  # Worker Settings (para ms-billing, ms-communication, ms-storage)
+  WorkerSettings__DefaultExecutionInterval: "60"
+  WorkerSettings__ToleranceHour: "1"
+
+  # HTTP Endpoints
+  HttpEndPoints__MSOrderBaseUrl: "http://ms-order:80"
+
+  # Log Settings
+  LogSettings__LogFilePath: "/logs"
+  LogSettings__LogFileName: "microservice.log"
+  LogSettings__LogFileNameWorker: "microservice-worker.log"
+
+  # RabbitMQ Settings (para ms-communication)
+  RabbitMQSettings__Uri: "amqp://admin:Pam9628%23d@rabbitmq-service:5672"
+  RabbitMQSettings__EmailExchange__Name: "sendmail-ex"
+  RabbitMQSettings__EmailExchange__Type: "topic"
+  RabbitMQSettings__SMSExchange__Name: "sendsms-ex"
+  RabbitMQSettings__SMSExchange__Type: "topic"
+  RabbitMQSettings__SendMailQueue__QueueName: "send-mail-qu"
+  RabbitMQSettings__SendMailQueue__ExchangeName: "sendmail-ex"
+  RabbitMQSettings__SendMailQueue__RoutingKey: "send-mail-rk"
+  RabbitMQSettings__SendSMSQueue__QueueName: "send-sms-qu"
+  RabbitMQSettings__SendSMSQueue__ExchangeName: "sendsms-ex"
+  RabbitMQSettings__SendSMSQueue__RoutingKey: "send-sms-rk"
+
