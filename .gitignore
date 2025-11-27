@@ -101,3 +101,7 @@ build-log.txt
 coverage/
 .nyc_output/
 
+
+# Large files
+*.pdf
+*.sql
