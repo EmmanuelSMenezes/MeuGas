@@ -22,7 +22,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.meugas.app",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "O MeuGas precisa da sua localização para encontrar as melhores ofertas de gás e água perto de você.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "O MeuGas precisa da sua localização para encontrar as melhores ofertas de gás e água perto de você."
       }
     },
     "android": {
@@ -63,6 +65,12 @@
         "expo-notifications",
         {
           "icon": "./assets/icon.png"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "O MeuGas precisa da sua localização para encontrar as melhores ofertas de gás e água perto de você."
         }
       ],
       "expo-font"

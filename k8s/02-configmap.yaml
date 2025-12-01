@@ -26,8 +26,8 @@ data:
   RABBITMQ_HOST: "rabbitmq-service"
   RABBITMQ_PORT: "5672"
   
-  # PostgreSQL
-  POSTGRES_HOST: "postgres-service"
+  # PostgreSQL (usando banco externo em produção)
+  POSTGRES_HOST: "35.172.113.118"
   POSTGRES_PORT: "5432"
 
   # Worker Settings (para ms-billing, ms-communication, ms-storage)

@@ -9,9 +9,10 @@ import { IBranch, IProduct } from "./Offer";
 export declare global {
   namespace ReactNavigation {
     interface RootParamList {
+      PhoneAuth: undefined;
       SignIn: undefined;
       SignUp: undefined;
-      OTPVerification: { phone: string };
+      OTPVerification: { phone: string; name?: string };
       RecoverPassword: undefined;
       Home: undefined;
       Tabs: NavigatorScreenParams<TabParamList>;

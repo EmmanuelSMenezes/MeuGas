@@ -6,47 +6,54 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
+    paddingHorizontal: theme.spacing.lg,
   },
 
-  
-    logo: {
-      width: 300, // Obrigatório para imagens remotas
-      height: 150, // Obrigatório para imagens remotas
-      alignSelf: 'center',
-      marginVertical: 20,
-    },
+  logo: {
+    width: 200,
+    height: 100,
+    alignSelf: 'center',
+    marginBottom: theme.spacing.xl,
+    marginTop: theme.spacing.xxl,
+  },
 
   title: {
-    color: theme.colors.primary,
-    fontFamily: theme.fonts.medium,
-    fontSize: 24,
-    marginBottom: 12,
+    color: theme.colors.textDark,
+    fontFamily: theme.fonts.bold,
+    fontSize: 32,
+    marginBottom: theme.spacing.lg,
     width: '100%',
+    letterSpacing: -0.5,
   },
 
   forgetPassword: {
-    marginTop: 4,
+    marginTop: theme.spacing.sm,
     width: '100%',
+    alignItems: 'flex-end',
   },
 
   forgetPasswordText: {
     color: theme.colors.primary,
-    fontFamily: theme.fonts.light,
-    width: '100%',
+    fontFamily: theme.fonts.medium,
+    fontSize: 14,
   },
 
   inputSpacing: {
-    marginTop: 8,
+    marginTop: theme.spacing.md,
   },
 
   signInButton: {
-    marginTop: 32,
+    marginTop: theme.spacing.xl,
+    height: 54,
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.md,
   },
 
   signUpButton: {
-    marginTop: 24,
+    marginTop: theme.spacing.lg,
     color: theme.colors.text,
     fontFamily: theme.fonts.regular,
+    fontSize: 15,
     verticalAlign: 'middle',
     flexDirection: 'row',
     alignItems: 'center',

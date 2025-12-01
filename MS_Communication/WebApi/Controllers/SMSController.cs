@@ -27,7 +27,7 @@ namespace WebApi.Controllers
     /// Endpoint responsável por enviar um sms para um numero especifico de telefone.
     /// </summary>
     /// <returns>Valida os dados passados para envio do sms e envia o mesmo para o numero de destino.</returns>
-    [Authorize]
+    [AllowAnonymous]
     [HttpPost("send")]
     [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status400BadRequest)]

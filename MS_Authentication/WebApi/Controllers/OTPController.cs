@@ -55,6 +55,66 @@ namespace WebApi.Controllers
     }
 
     /// <summary>
+    /// Endpoint responsável por enviar OTP para login/registro.
+    /// </summary>
+    /// <returns>Retorna "true" caso o OTP seja enviado com sucesso.</returns>
+    ///
+    [HttpPost("send-login")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(Response<bool>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<Response<bool>>> SendOTPLogin([FromBody] SendOTPLoginRequest request)
+    {
+      try
+      {
+        var response = await _otpService.SendOtpLogin(request.Phone, request.Name);
+        return StatusCode(StatusCodes.Status200OK, new Response<bool>() { Status = 200, Message = $"OTP enviado com sucesso.", Data = true, Success = true });
+      }
+      catch (Exception ex)
+      {
+        _logger.Error(ex, "Exception while sending OTP for login!");
+        switch (ex.Message)
+        {
+          case "SMSNotSended":
+            return StatusCode(StatusCodes.Status403Forbidden, new Response<bool>() { Status = 403, Message = $"Não foi possível enviar SMS com o código OTP.", Success = false, Error = ex.ToString() });
+          case "createOtpNotSuccefully":
+            return StatusCode(StatusCodes.Status304NotModified, new Response<bool>() { Status = 304, Message = $"Não foi possível criar OTP. Tente novamente.", Success = false, Error = ex.ToString() });
+          default:
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response<bool>() { Status = 500, Message = $"Erro inesperado ao enviar OTP.", Success = false, Error = ex.ToString() });
+        }
+      }
+    }
+
+    /// <summary>
+    /// Endpoint responsável por verificar OTP e fazer login/registro.
+    /// </summary>
+    /// <returns>Retorna token de autenticação.</returns>
+    ///
+    [HttpPost("verify-login")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(Response<CreateSessionResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<Response<CreateSessionResponse>>> VerifyOTPLogin([FromBody] VerifyOTPLoginRequest request)
+    {
+      try
+      {
+        var response = await _otpService.VerifyOtpLogin(request.OtpCode, request.Phone, request.Name);
+        return StatusCode(StatusCodes.Status200OK, new Response<CreateSessionResponse>() { Status = 200, Message = $"Login realizado com sucesso.", Data = response, Success = true });
+      }
+      catch (Exception ex)
+      {
+        _logger.Error(ex, "Exception while verifying OTP for login!");
+        switch (ex.Message)
+        {
+          case "otpNotRegistered":
+            return StatusCode(StatusCodes.Status404NotFound, new Response<CreateSessionResponse>() { Status = 404, Message = $"Código OTP não encontrado.", Success = false, Error = ex.ToString() });
+          case "unauthorized":
+            return StatusCode(StatusCodes.Status401Unauthorized, new Response<CreateSessionResponse>() { Status = 401, Message = $"Código OTP inválido ou expirado.", Success = false, Error = ex.ToString() });
+          default:
+            return StatusCode(StatusCodes.Status500InternalServerError, new Response<CreateSessionResponse>() { Status = 500, Message = $"Erro inesperado ao verificar OTP.", Success = false, Error = ex.ToString() });
+        }
+      }
+    }
+
+    /// <summary>
     /// Endpoint responsável por retornar se o Microserviço está ativo.
     /// </summary>
     /// <returns>Retorna "true" caso o microserviço esteja ativo.</returns>

@@ -6,12 +6,13 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-import { Button, Header, Steps } from "../../components/Shared";
+import { Button, Header, Steps, Input } from "../../components/Shared";
 import { styles } from "./styles";
 import Review from "./components/Review";
 import Address from "./components/Address";
 import { Feather } from "@expo/vector-icons";
 import { theme } from "../../styles/theme";
+import { globalStyles } from "../../styles/globalStyles";
 import * as yup from "yup";
 import { Controller, useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -31,6 +32,7 @@ import { useThemeContext } from "../../hooks/themeContext";
 import { PagSeguro } from "../../utils/pagSeguroScript";
 import { REACT_APP_PAGSEGURO_PUBLIC_KEY } from "@env";
 import WebView from "react-native-webview";
+import { useAuth } from "../../hooks/AuthContext";
 
 export interface OrderProps {
   address: {
@@ -64,139 +66,89 @@ export interface OrderProps {
 
 const Checkout: React.FC = () => {
   const { dynamicTheme, themeController } = useThemeContext();
-  const { consumer, addresses, defaultAddress } = useUser();
+  const { user } = useAuth();
+  const { consumer, defaultAddress: userDefaultAddress } = useUser();
   const { createOrder, getOrderPayment, pay, createSession3DS } = useOrder();
   const { getStoreIsAvailable } = useOffer();
   const { cart, totalAmount, clearCart, freight, cartBranch } = useCart();
   const { openAlert, closeAlert } = useGlobal();
-  const { goBack } = useNavigation();
+  const { goBack, navigate } = useNavigation();
   const { replace } = useNavigation<NativeStackNavigationProp<any>>();
 
-  const [currentStep, setCurrentStep] = useState(0);
   const [payments, setPayments] = useState<OrderPayment>();
-  const [cardCode, setCardCode] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingPayments, setIsLoadingPayments] = useState(true);
 
   const [showUnavailableStoreModal, setShowUnavailableStoreModal] =
     useState(false);
-  const [showCardCodeModal, setShowCardCodeModal] = useState(false);
 
-  const [showWebView, setShowWebView] = useState(false);
-  const [pagseguroSession, setPagseguroSession] = useState("");
-  const [customerRequest, setCustomerRequest] = useState<any>();
+  // Buscar endereço padrão do consumer se userDefaultAddress não estiver disponível
+  const defaultAddress = useMemo(() => {
+    console.log("🏠 Checkout - Calculando defaultAddress");
+    console.log("  - userDefaultAddress:", userDefaultAddress);
+    console.log("  - consumer?.default_address:", consumer?.default_address);
+    console.log("  - consumer?.addresses?.length:", consumer?.addresses?.length);
 
-  const webViewRef = useRef(null);
+    if (userDefaultAddress) {
+      console.log("✅ Usando userDefaultAddress");
+      return userDefaultAddress;
+    }
+    if (consumer?.default_address && consumer?.addresses?.length > 0) {
+      const found = consumer.addresses.find(addr => addr.address_id === consumer.default_address);
+      console.log("✅ Encontrado endereço do consumer:", found);
+      return found;
+    }
+    console.log("⚠️ Usando primeiro endereço como fallback:", consumer?.addresses?.[0]);
+    return consumer?.addresses?.[0]; // Fallback para o primeiro endereço
+  }, [userDefaultAddress, consumer?.default_address, consumer?.addresses]);
 
+  // Schema simplificado - campos necessários
   const orderSchema = yup.object().shape({
-    address_id: yup.string().required("Selecione alguma forma de entrega"),
-    address_partner: yup
-      .boolean()
-      .required("Selecione algum ponto de retirada"),
-    payment_local: yup
-      .string()
-      .required("Selecione alguma forma de onde pagar"),
-    payment_method: yup
-      .string()
-      .required("Selecione alguma forma de pagamento"),
-    payment_card: yup.object().when("payment_method", {
-      is: (value) => value === "3" || value === "4",
-      then: (schema) =>
-        schema.shape({
-          installments: yup.string().required("Campo obrigatório"),
-          card_number: yup.string().required("Campo obrigatório"),
-          card_id: yup.string().required("Campo obrigatório"),
-          expiration_date: yup.string().required("Campo obrigatório"),
-          cvv: yup.string().required("Obrigatório"),
-          holder: yup.string().required("Campo obrigatório"),
-          document: yup.string().required("Campo obrigatório"),
-        }),
-    }),
-    shipping_option: yup.string().required("Selecione alguma forma de envio"),
+    shipping_option: yup.string().required("Selecione uma forma de envio"),
+    payment_method: yup.string().required("Selecione uma forma de pagamento"),
+    payment_local: yup.string().required("Selecione onde pagar"),
     observation: yup.string(),
-    change: yup.string().test({
-      test: (value) => Number(value) / 100 > totalAmount || !Number(value),
-      message: `O valor inserido deve ser maior que o total do pedido (${formatPrice(
-        totalAmount
-      )}).`,
-    }),
+    change: yup.string(),
   });
 
   const methods = useForm<OrderProps>({
     resolver: yupResolver(orderSchema),
+    defaultValues: {
+      observation: '',
+    }
   });
 
-  const previousStep = () => setCurrentStep((tab) => tab - 1);
+  const getPayment = async () => {
+    console.log("📦 Checkout - getPayment chamado");
+    console.log("📦 cartBranch:", cartBranch);
+    console.log("📦 cartBranch?.branch_id:", cartBranch?.branch_id);
 
-  const triggerFields = async () => {
-    let isValid = false;
-
-    switch (currentStep) {
-      case 0:
-        isValid = await methods.trigger(["address_id", "shipping_option"]);
-        break;
-
-      case 1:
-        isValid = await methods.trigger([
-          "payment_local",
-          "payment_method",
-          "change",
-        ]);
-        break;
-
-      default:
-        break;
+    if (!cartBranch?.branch_id) {
+      console.log("❌ Checkout - branch_id não disponível, abortando getPayment");
+      setIsLoadingPayments(false);
+      return;
     }
 
-    return isValid;
-  };
-
-  const nextStep = async () => {
-    const isValid = await triggerFields();
-
-    if (isValid) setCurrentStep((tab) => tab + 1);
-  };
-
-  const TabOptions = [
-    {
-      id: 1,
-      label: "Endereço",
-      tab: "Address",
-      component: () => <Address />,
-      action: () => {},
-    },
-    {
-      id: 2,
-      label: "Pagamento",
-      tab: "Payment",
-      component: () => <Payments payments={payments} />,
-      action: () => {},
-    },
-    {
-      id: 3,
-      label: "Revisão",
-      tab: "Review",
-      component: () => <Review />,
-      action: () => {},
-    },
-  ];
-
-  const TabContent = useMemo(
-    () => TabOptions[currentStep].component,
-    [currentStep]
-  );
-
-  const getPayment = async () => {
-    const data = await getOrderPayment(cartBranch?.branch_id);
-    // console.log("-> SHIPPING", JSON.stringify(data));
-    setPayments(data);
+    try {
+      setIsLoadingPayments(true);
+      const data = await getOrderPayment(cartBranch?.branch_id);
+      console.log("📦 Dados de pagamento recebidos:", data);
+      setPayments(data);
+    } catch (error) {
+      console.log("❌ Erro ao carregar pagamentos:", error);
+    } finally {
+      setIsLoadingPayments(false);
+    }
   };
 
   const getShippingWaysOnUpdate = async () => {
+    console.log("📦 Checkout - getShippingWaysOnUpdate chamado");
     const data = await getOrderPayment(
       cartBranch.branch_id,
       methods.watch("address.latitude"),
       methods.watch("address.longitude")
     );
-
+    console.log("📦 Dados de envio atualizados:", data);
     setPayments(data);
   };
 
@@ -205,261 +157,184 @@ const Checkout: React.FC = () => {
       defaultAddress?.address_id !== "1" && defaultAddress?.address_id;
 
     if (hasId) {
-      const isAvailable = await isAvailableStore();
-      if (!isAvailable) return;
-
       methods.setValue("address_id", defaultAddress.address_id);
       methods.setValue("address", defaultAddress);
-      if (freight?.name.toLowerCase().indexOf("retirada") != -1) {
-        methods.setValue("address_partner", true);
-      } else {
-        methods.setValue("address_partner", false);
-      }
+      methods.setValue("address_partner", false);
     }
   };
 
+  // Verificar se o usuário está autenticado
   useEffect(() => {
-    selectDefaultAddress();
-    getPayment();
-  }, []);
-
-  useEffect(() => {
-    if (freight)
-      methods.setValue("shipping_option", freight.delivery_option_id);
-  }, [freight]);
-
-  useEffect(() => {
-    if (methods.watch("address_id")) {
-      getShippingWaysOnUpdate();
-    }
-  }, [methods.watch("address_id")]);
-
-  const transshipmentDiff = Number(methods.watch("change")) / 100 - totalAmount;
-  const isCardPaymentMethod = !!pay?.find(
-    ({ item, label }) =>
-      methods.watch("payment_method") === item &&
-      (label.toUpperCase() === "CARTÃO DE CRÉDITO" ||
-        label.toUpperCase() === "CARTÃO DE DÉBITO")
-  );
-
-  const isDigitalPaymentMethod = !!payments?.payment_options?.find(
-    ({ payment_local_name, payment_local_id }) =>
-      methods.watch("payment_local") === payment_local_id &&
-      payment_local_name.toUpperCase() === "PAGAMENTO NO APLICATIVO"
-  );
-
-  const isAvailableStore = async () => {
-    const isAvailable = await getStoreIsAvailable(
-      cartBranch?.branch_id,
-      Number(methods.watch("address.latitude")),
-      Number(methods.watch("address.longitude"))
-    );
-
-    if (!isAvailable) {
-      setShowUnavailableStoreModal(true);
-    }
-
-    return isAvailable;
-  };
-
-  const onSubmit = async (data: OrderProps) => {
-
-    // console.log(data)
-
-    // Ao chamar essa função, recebemos um boolean que condiz se a loja está disponível ou não
-    // (horários e dias de funcionamento de acordo com o endereço selecionado são levados em consideração)
-    const isAvailable = await isAvailableStore();
-
-    // E caso não esteja disponível, o pedido não é realizado.
-    if (!isAvailable) {
+    if (!user?.user_id) {
+      console.log("❌ Checkout - Usuário não autenticado, redirecionando para login");
+      // Redirecionar imediatamente para a tela de login
+      replace("PhoneAuth");
       return;
     }
 
-    const orderData = {
-      // Passa por todos os itens do carrinho e monta um objeto que a API está esperando
-      order_itens: cart.map(({ quantity, product }) => {
-        return {
-          product_id: product.product_id,
-          product_name: product.name,
-          quantity: quantity,
-          product_value: product.price,
-        };
-      }),
-      shipping_options: freight,
-      amount: totalAmount,
-      created_by: consumer.consumer_id,
-      observation: data.observation || "",
-      consumer_id: consumer.consumer_id,
-      address: {
-        legal_name: consumer.legal_name,
-        fantasy_name: consumer.fantasy_name,
-        document: consumer.document,
-        email: consumer.email,
-        phone_number: consumer.phone_number,
-        street: data.address.street,
-        city: data.address.city,
-        state: data.address.state,
-        number: data.address.number,
-        complement: data.address.complement,
-        district: data.address.district,
-        zip_code: data.address.zip_code,
-        latitude: data.address.latitude,
-        longitude: data.address.longitude,
-      },
-      shipping_company_id: "7e1386fa-c4d7-4c11-9489-a3068996bac0",
-      branch_id: cartBranch?.branch_id,
-      change: Number(data?.change) > 0 ? transshipmentDiff : 0,
-      payments: [
-        {
-          payment_options_id: data?.payment_method,
-          amount_paid: totalAmount,
-          installments: 1,
-        },
-      ],
-    };
+    console.log("✅ Checkout - Usuário autenticado:", user.user_id);
+    selectDefaultAddress();
+  }, []);
 
-    // console.log("card", JSON.stringify(data.payment_card));
+  // Carregar dados de pagamento (aguardar defaultAddress estar disponível)
+  useEffect(() => {
+    console.log("📦 Checkout - useEffect de pagamento disparado");
+    console.log("📦 cartBranch?.branch_id:", cartBranch?.branch_id);
+    console.log("📦 defaultAddress:", defaultAddress);
+    console.log("📦 consumer?.default_address:", consumer?.default_address);
+    console.log("📦 consumer?.addresses?.length:", consumer?.addresses?.length);
 
-    if (isCardPaymentMethod && isDigitalPaymentMethod) {
-      const expirationCurrentYear = new Date();
-      const expirationStartYear = expirationCurrentYear
-        .getFullYear()
-        .toString()
-        .slice(0, 2);
-      const [expirationMonth, expirationYear] =
-        data.payment_card.expiration_date.split("/");
-
-      const card = PagSeguro?.encryptCard({
-        publicKey: REACT_APP_PAGSEGURO_PUBLIC_KEY,
-        holder: data.payment_card.holder,
-        number: data.payment_card.card_number.replaceAll(" ", ""),
-        expMonth: expirationMonth,
-        expYear: expirationYear,
-        securityCode: cardCode,
+    if (cartBranch?.branch_id && defaultAddress) {
+      console.log("✅ Checkout - cartBranch e defaultAddress disponíveis, carregando pagamento");
+      getPayment();
+    } else {
+      console.log("⏳ Checkout - Aguardando dados:", {
+        cartBranch: !!cartBranch?.branch_id,
+        defaultAddress: !!defaultAddress,
+        consumer_default_address: !!consumer?.default_address,
+        addresses_length: consumer?.addresses?.length || 0
       });
+      // Se não tiver os dados necessários, marcar como não carregando
+      setIsLoadingPayments(false);
+    }
+  }, [cartBranch?.branch_id, defaultAddress?.address_id]);
 
-      if (card.hasErrors) {
+  // Configurar valores padrão quando payments carregar
+  useEffect(() => {
+    console.log("📦 Checkout - Configurando valores padrão");
+    console.log("📦 payments:", payments);
+    console.log("📦 shipping_options:", payments?.shipping_options);
+    console.log("📦 payment_options:", payments?.payment_options);
+
+    if (payments?.shipping_options?.length > 0 && !methods.watch("shipping_option")) {
+      const defaultShipping = payments.shipping_options[0];
+      console.log("✅ Setando shipping_option padrão:", defaultShipping.delivery_option_id);
+      methods.setValue("shipping_option", defaultShipping.delivery_option_id);
+    }
+
+    if (payments?.payment_options?.length > 0 && !methods.watch("payment_method")) {
+      const firstPayment = payments.payment_options[0];
+      console.log("✅ Setando payment_method padrão:", firstPayment.payment_options_id);
+      methods.setValue("payment_method", firstPayment.payment_options_id);
+      methods.setValue("payment_local", firstPayment.payment_local_id);
+    }
+  }, [payments]);
+
+
+
+
+
+  const onSubmit = async (data: OrderProps) => {
+    try {
+      setIsSubmitting(true);
+
+      // Validações básicas
+      if (!defaultAddress || !defaultAddress.address_id) {
         openAlert({
-          title: "Dado(s) inválido(s)",
-          description:
-            "Houve um erro ao tentar cadastrar o cartão. Revise os dados e tente novamente.",
+          title: "Endereço necessário",
+          description: "Você precisa ter um endereço cadastrado para fazer o pedido.",
           type: "error",
           buttons: {
             confirmButtonTitle: "Ok",
             cancelButton: false,
           },
         });
-
+        setIsSubmitting(false);
         return;
       }
 
-      orderData.payments[0]["card_id"] = data?.payment_card?.card_id;
-      orderData.payments[0]["security_code"] = cardCode;
+      // Buscar opções selecionadas
+      const shippingOption = payments?.shipping_options?.find(
+        s => s.delivery_option_id === data.shipping_option
+      );
 
-      orderData["encrypted"] = card.encryptedCard;
+      const paymentOption = payments?.payment_options?.find(
+        p => p.payment_options_id === data.payment_method
+      );
 
-      // Verifica se é cartão de débito para continuar a etapa com a PagBank
-      if (
-        !!pay?.find(
-          ({ item, label }) =>
-            methods.watch("payment_method") === item &&
-            label.toUpperCase() === "CARTÃO DE DÉBITO"
-        )
-      ) {
-        const { session } = await createSession3DS();
-
-        const request = {
-          data: {
-            customer: {
-              name: consumer.legal_name,
-              email: consumer.email,
-              phones: [
-                {
-                  country: "55",
-                  area: consumer.phone_number.slice(0, 2),
-                  number: consumer.phone_number.slice(2),
-                  type: "MOBILE",
-                },
-              ],
-            },
-            paymentMethod: {
-              type: "DEBIT_CARD",
-              installments: 1,
-              card: {
-                number: data.payment_card.card_number.replaceAll(" ", ""),
-                expMonth: expirationMonth,
-                expYear: expirationYear,
-                holder: {
-                  name: data.payment_card.holder,
-                },
-              },
-            },
-            amount: {
-              value: totalAmount * 100,
-              currency: "BRL",
-            },
-            billingAddress: {
-              street: data.address.street,
-              number: data.address.number,
-              complement: data.address.complement,
-              regionCode: data.address.state,
-              country: "BRA",
-              city: data.address.city,
-              postalCode: data.address.zip_code,
-            },
-            shippingAddress: {
-              street: data.address.street,
-              number: data.address.number,
-              complement: data.address.complement,
-              regionCode: data.address.state,
-              country: "BRA",
-              city: data.address.city,
-              postalCode: data.address.zip_code,
-            },
-            dataOnly: false,
+      if (!shippingOption) {
+        openAlert({
+          title: "Erro",
+          description: "Selecione uma forma de entrega.",
+          type: "error",
+          buttons: {
+            confirmButtonTitle: "Ok",
+            cancelButton: false,
           },
-        };
-
-        // console.log("to passando por aqui viu", JSON.stringify(request));
-        setShowWebView(true);
-
-        setTimeout(() => {
-          webViewRef?.current?.postMessage(
-            JSON.stringify({
-              request,
-              session,
-            })
-          );
-        }, 3000);
-
+        });
+        setIsSubmitting(false);
         return;
       }
-    }
 
-    // Caso a forma de envio do pedido seja retirada na loja, não será setado no objeto o ID do endereço do consumidor.
-    if (!data.address_partner) orderData["address_id"] = data.address_id;
+      if (!paymentOption) {
+        openAlert({
+          title: "Erro",
+          description: "Selecione uma forma de pagamento.",
+          type: "error",
+          buttons: {
+            confirmButtonTitle: "Ok",
+            cancelButton: false,
+          },
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-    // console.log("payload", JSON.stringify(orderData));
+      const orderData = {
+        order_itens: cart.map(({ quantity, product }) => ({
+          product_id: product.product_id,
+          product_name: product.name,
+          quantity: quantity,
+          product_value: product.price,
+        })),
+        shipping_options: shippingOption,
+        amount: totalAmount,
+        created_by: consumer.consumer_id,
+        observation: data.observation || "",
+        consumer_id: consumer.consumer_id,
+        address: {
+          legal_name: consumer.legal_name,
+          fantasy_name: consumer.fantasy_name,
+          document: consumer.document,
+          email: consumer.email,
+          phone_number: consumer.phone_number,
+          street: defaultAddress.street,
+          city: defaultAddress.city,
+          state: defaultAddress.state,
+          number: defaultAddress.number,
+          complement: defaultAddress.complement || "",
+          district: defaultAddress.district,
+          zip_code: defaultAddress.zip_code,
+          latitude: defaultAddress.latitude,
+          longitude: defaultAddress.longitude,
+        },
+        shipping_company_id: "7e1386fa-c4d7-4c11-9489-a3068996bac0",
+        branch_id: cartBranch?.branch_id,
+        address_id: defaultAddress.address_id,
+        change: 0,
+        payments: [
+          {
+            payment_options_id: paymentOption.payment_options_id,
+            amount_paid: totalAmount,
+            installments: 1,
+          },
+        ],
+      };
 
-    // Ao criar um pedido, recebe-se as informações do pedido e resposta do pagamento da pagseguro
-    const order = await createOrder(orderData);
+      console.log("📦 Criando pedido:", orderData);
 
-    // console.log("response", JSON.stringify(order));
-    // Para pagamentos feitos via PIX e Cartão, será receibido um objeto da pagseguro com as informações a serem validadas.
-    const { sucessPayment, errorPayment } = order?.pagseguro;
-    const { status } = sucessPayment ? JSON.parse(sucessPayment) : "";
+      // Criar o pedido
+      const order = await createOrder(orderData);
 
-    // Alertar ao usuário se o pagamento do pedido deu errado
-    if (
-      status === "CANCELED" ||
-      status === "DECLINED" ||
-      errorPayment?.errorMessages?.length > 0
-    ) {
+      console.log("✅ Pedido criado:", order);
+
+      // Limpar carrinho e mostrar sucesso
+      await clearCart();
+
       openAlert({
-        title: "Pagamento recusado",
-        description:
-          "Seu pedido foi gerado, mas não foi possível realizar o pagamento",
-        type: "error",
+        title: "Pedido realizado com sucesso! 🎉",
+        description: `Seu pedido #${order.order_number || ''} foi criado e será processado em breve.`,
+        type: "success",
         buttons: {
           cancelButton: false,
           confirmButton: false,
@@ -468,148 +343,49 @@ const Checkout: React.FC = () => {
             {
               title: "Ver pedido",
               onPress: () => {
+                closeAlert();
                 replace("OrderDetails", { id: order.order_id });
-                closeAlert();
-                clearCart();
               },
             },
             {
-              title: "Ok",
+              title: "Voltar ao início",
               onPress: () => {
-                goBack();
                 closeAlert();
-                clearCart();
+                replace("Home");
               },
             },
           ],
         },
       });
 
-      return;
-    }
+    } catch (error) {
+      console.error("❌ Erro ao criar pedido:", error);
 
-    // Caso o pagamento seja feito via pix, será levado a outra página para pagamento
-    if (
-      !!pay?.find(
-        ({ item, label }) =>
-          methods.watch("payment_method") === item && label === "Pix"
-      )
-    ) {
       openAlert({
-        title: "Pedido aguardando pagamento",
-        description:
-          "Seu pedido está aguardando o pagamento, resta realizar o pagamento.",
-        type: "success",
+        title: "Erro ao criar pedido",
+        description: error?.message || "Ocorreu um erro ao processar seu pedido. Tente novamente.",
+        type: "error",
         buttons: {
+          confirmButtonTitle: "Ok",
           cancelButton: false,
-          confirmButton: false,
-          orientation: "horizontal",
-          extraButtons: [
-            {
-              title: "Ok",
-              onPress: () => {
-                closeAlert();
-                replace("PixPayment", {
-                  pix: JSON.parse(sucessPayment),
-                  order,
-                });
-                clearCart();
-              },
-            },
-          ],
         },
       });
-
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    // Caso nenhuma das condições anteriores sejam satisfeitas, segue fluxo normal de pedido concluído.
-    openAlert({
-      title: "Pedido realizado",
-      description: "Seu pedido será enviado o mais breve possível.",
-      type: "success",
-      buttons: {
-        cancelButton: false,
-        confirmButton: false,
-        orientation: "horizontal",
-        extraButtons: [
-          {
-            title: "Ver pedido",
-            onPress: () => {
-              replace("OrderDetails", { id: order.order_id });
-              closeAlert();
-              clearCart();
-            },
-          },
-          {
-            title: "Ok",
-            onPress: () => {
-              goBack();
-              closeAlert();
-              clearCart();
-            },
-          },
-        ],
-      },
-    });
-
-    // return response;
   };
 
-  if (showWebView) {
-    return (
-      <View style={{ flex: 1 }}>
-        <WebView
-          ref={webViewRef}
-          source={{
-            html: `<html>
-            <head>
-              <script src="https://assets.pagseguro.com.br/checkout-sdk-js/rc/dist/browser/pagseguro.min.js"></script>
-              <script>
-                document.addEventListener("message", ({ data }) => {
-                  const { session, request } = JSON.parse(data);
+  // Verificar se está tudo carregado
+  const isLoading = isLoadingPayments;
 
-                  window.ReactNativeWebView.postMessage("Sessão utilizada -> "+session)
-                  window.ReactNativeWebView.postMessage("Request utilizada -> "+session)
-
-                  PagSeguro.setUp({
-                    session,
-                    env: 'PROD'
-                  });
-
-                  PagSeguro.authenticate3DS(request).then( result => {
-                    window.ReactNativeWebView.postMessage("Erro ao tentar autenticar 3DS ->");
-                    window.ReactNativeWebView.postMessage(JSON.stringify(result));
-                    this.logResponseToScreen(result);
-                    this.stopLoading();
-                  }).catch((err) => {
-                    window.ReactNativeWebView.postMessage("Erro ao tentar autenticar 3DS ->")
-                    window.ReactNativeWebView.postMessage(JSON.stringify(err));
-                    if(err instanceof PagSeguro.PagSeguroError ) {
-                        window.alert(JSON.stringify(err.detail))
-                        // console.log(err);
-                        // console.log(err.detail);
-                        this.stopLoading();
-                    }
-                  })
-                });
-
-              </script>
-            </head>
-            <body>
-              <p id="output">undefined</p>
-            </body>
-          </html>`,
-          }}
-          onMessage={({ nativeEvent }) => {
-            // console.log("MESSAGE ->", nativeEvent.data);
-            // // console.log("MESSAGE ->", JSON.parse(nativeEvent.data));
-          }}
-          injectedJavaScript={`window.alert(${pagseguroSession})`}
-        />
-      </View>
-    );
-  }
+  // Log para debug
+  useEffect(() => {
+    console.log("📊 Checkout - Estado de loading:");
+    console.log("  - isLoadingPayments:", isLoadingPayments);
+    console.log("  - payments:", payments ? "✅ Carregado" : "❌ Não carregado");
+    console.log("  - defaultAddress:", defaultAddress ? "✅ Carregado" : "❌ Não carregado");
+    console.log("  - isLoading final:", isLoading);
+  }, [isLoadingPayments, payments, defaultAddress]);
 
   return (
     <ScrollView
@@ -624,82 +400,252 @@ const Checkout: React.FC = () => {
           setIsVisible={setShowUnavailableStoreModal}
         />
 
-        <CardCodeModal
-          isVisible={showCardCodeModal}
-          setIsVisible={setShowCardCodeModal}
-          onChangeCardCode={setCardCode}
-          onSubmitCardCode={methods.handleSubmit(onSubmit)}
-        />
-
         <View style={themeController(styles.header)}>
           <Header backButton />
-          <Text style={themeController(styles.title)}>Realizar pedido</Text>
-          <Steps ordered vertical currentTab={currentStep} tabs={TabOptions} />
+          <Text style={themeController(styles.title)}>Finalizar Pedido</Text>
         </View>
 
-        <View style={themeController(styles.content)}>
-          <FormProvider {...methods}>
-            <TabContent />
-          </FormProvider>
-          <View style={themeController(styles.footer)}>
-            {currentStep !== 0 ? (
-              <TouchableOpacity
-                style={themeController(styles.previousButton)}
-                onPress={previousStep}
-              >
-                <Feather
-                  name="chevron-left"
-                  size={18}
-                  color={dynamicTheme.colors.primary}
-                />
-                <Text style={themeController(styles.previousButtonText)}>
-                  Anterior
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <View />
-            )}
-
-            {currentStep !== 2 ? (
-              <TouchableOpacity
-                style={themeController(styles.nextButton)}
-                onPress={nextStep}
-              >
-                <Text style={themeController(styles.nextButtonText)}>
-                  Próximo
-                </Text>
-                <Feather
-                  name="chevron-right"
-                  size={18}
-                  color={theme.colors.white}
-                />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                disabled={methods.formState.isSubmitting}
-                style={[themeController(styles.nextButton)]}
-                onPress={
-                  isCardPaymentMethod && isDigitalPaymentMethod
-                    ? () => setShowCardCodeModal(true)
-                    : methods.handleSubmit(onSubmit)
-                }
-              >
-                <Text style={themeController(styles.nextButtonText)}>
-                  Finalizar
-                </Text>
-                {methods.formState.isSubmitting ? (
-                  <ActivityIndicator size={18} color={theme.colors.white} />
-                ) : (
-                  <Feather
-                    name="chevron-right"
-                    size={16}
-                    color={theme.colors.white}
-                  />
-                )}
-              </TouchableOpacity>
-            )}
+        {isLoading ? (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
+            <ActivityIndicator size="large" color={dynamicTheme.colors.primary} />
+            <Text style={[themeController(globalStyles.description), { marginTop: 16, textAlign: 'center' }]}>
+              Carregando informações do pedido...
+            </Text>
           </View>
-        </View>
+        ) : (
+          <View style={themeController(styles.content)}>
+            <FormProvider {...methods}>
+              {/* Resumo do Pedido */}
+              <Review />
+
+              {/* Endereço de Entrega */}
+              {defaultAddress && (
+                <View style={{ marginTop: 20, padding: 16, backgroundColor: dynamicTheme.colors.background, borderRadius: 8 }}>
+                  <Text style={themeController(globalStyles.subtitle)}>
+                    📍 Endereço de Entrega
+                  </Text>
+                  <Text style={themeController(globalStyles.description)}>
+                    {defaultAddress.street}, {defaultAddress.number}
+                  </Text>
+                  <Text style={themeController(globalStyles.description)}>
+                    {defaultAddress.district} - {defaultAddress.city}/{defaultAddress.state}
+                  </Text>
+                </View>
+              )}
+
+              {/* Forma de Entrega */}
+              {payments?.shipping_options && payments.shipping_options.length > 0 ? (
+                <View style={{ marginTop: 20 }}>
+                  <Text style={themeController(globalStyles.subtitle)}>
+                    🚚 Forma de Entrega
+                  </Text>
+                  <Text style={themeController(globalStyles.description)}>
+                    Confira se os dados de envio estão corretos
+                  </Text>
+                  <Controller
+                    control={methods.control}
+                    name="shipping_option"
+                    render={({ field: { onChange, value } }) => (
+                      <View style={{ marginTop: 8 }}>
+                        {payments.shipping_options.map((option) => (
+                          <TouchableOpacity
+                            key={option.delivery_option_id}
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              padding: 12,
+                              marginBottom: 8,
+                              backgroundColor: value === option.delivery_option_id
+                                ? dynamicTheme.colors.primary + '20'
+                                : dynamicTheme.colors.background,
+                              borderRadius: 8,
+                              borderWidth: 1,
+                              borderColor: value === option.delivery_option_id
+                                ? dynamicTheme.colors.primary
+                                : 'transparent',
+                            }}
+                            onPress={() => onChange(option.delivery_option_id)}
+                          >
+                            <View style={{
+                              width: 20,
+                              height: 20,
+                              borderRadius: 10,
+                              borderWidth: 2,
+                              borderColor: value === option.delivery_option_id
+                                ? dynamicTheme.colors.primary
+                                : '#ccc',
+                              marginRight: 12,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            }}>
+                              {value === option.delivery_option_id && (
+                                <View style={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: 5,
+                                  backgroundColor: dynamicTheme.colors.primary,
+                                }} />
+                              )}
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={themeController(globalStyles.subtitle)}>
+                                {option.name}
+                              </Text>
+                              <Text style={themeController(globalStyles.description)}>
+                                {formatPrice(option.value)}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  />
+                  {methods.formState.errors.shipping_option && (
+                    <Text style={{ color: 'red', marginTop: 4 }}>
+                      {methods.formState.errors.shipping_option.message}
+                    </Text>
+                  )}
+                </View>
+              ) : (
+                <View style={{ marginTop: 20, padding: 16, backgroundColor: '#FFF3CD', borderRadius: 8 }}>
+                  <Text style={{ color: '#856404' }}>
+                    ⚠️ Nenhuma opção de entrega disponível
+                  </Text>
+                </View>
+              )}
+
+              {/* Forma de Pagamento */}
+              {payments?.payment_options && payments.payment_options.length > 0 ? (
+                <View style={{ marginTop: 20 }}>
+                  <Text style={themeController(globalStyles.subtitle)}>
+                    💰 Forma de Pagamento
+                  </Text>
+                  <Text style={themeController(globalStyles.description)}>
+                    A transação será descontada da seguinte forma
+                  </Text>
+                  <Controller
+                    control={methods.control}
+                    name="payment_method"
+                    render={({ field: { onChange, value } }) => (
+                      <View style={{ marginTop: 8 }}>
+                        {payments.payment_options.map((option) => (
+                          <TouchableOpacity
+                            key={option.payment_options_id}
+                            style={{
+                              flexDirection: 'row',
+                              alignItems: 'center',
+                              padding: 12,
+                              marginBottom: 8,
+                              backgroundColor: value === option.payment_options_id
+                                ? dynamicTheme.colors.primary + '20'
+                                : dynamicTheme.colors.background,
+                              borderRadius: 8,
+                              borderWidth: 1,
+                              borderColor: value === option.payment_options_id
+                                ? dynamicTheme.colors.primary
+                                : 'transparent',
+                            }}
+                            onPress={() => {
+                              onChange(option.payment_options_id);
+                              methods.setValue("payment_local", option.payment_local_id);
+                            }}
+                          >
+                            <View style={{
+                              width: 20,
+                              height: 20,
+                              borderRadius: 10,
+                              borderWidth: 2,
+                              borderColor: value === option.payment_options_id
+                                ? dynamicTheme.colors.primary
+                                : '#ccc',
+                              marginRight: 12,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            }}>
+                              {value === option.payment_options_id && (
+                                <View style={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: 5,
+                                  backgroundColor: dynamicTheme.colors.primary,
+                                }} />
+                              )}
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text style={themeController(globalStyles.subtitle)}>
+                                {option.description}
+                              </Text>
+                              <Text style={themeController(globalStyles.description)}>
+                                {option.payment_local_name}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                  />
+                  {methods.formState.errors.payment_method && (
+                    <Text style={{ color: 'red', marginTop: 4 }}>
+                      {methods.formState.errors.payment_method.message}
+                    </Text>
+                  )}
+                </View>
+              ) : (
+                <View style={{ marginTop: 20, padding: 16, backgroundColor: '#FFF3CD', borderRadius: 8 }}>
+                  <Text style={{ color: '#856404' }}>
+                    ⚠️ Nenhuma opção de pagamento disponível
+                  </Text>
+                </View>
+              )}
+
+              {/* Campo de observação */}
+              <View style={{ marginTop: 20 }}>
+                <Text style={themeController(globalStyles.subtitle)}>
+                  📝 Observações (opcional)
+                </Text>
+                <Controller
+                  control={methods.control}
+                  name="observation"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      placeholder="Ex: Deixar na portaria, tocar a campainha..."
+                      value={value}
+                      onChangeText={onChange}
+                      multiline
+                      numberOfLines={3}
+                      style={{ minHeight: 80, textAlignVertical: 'top', marginTop: 8 }}
+                    />
+                  )}
+                />
+              </View>
+
+              {/* Botão de finalizar */}
+              <View style={themeController(styles.footer)}>
+                <TouchableOpacity
+                  disabled={isSubmitting}
+                  style={[
+                    themeController(styles.nextButton),
+                    { width: '100%', opacity: isSubmitting ? 0.6 : 1 }
+                  ]}
+                  onPress={methods.handleSubmit(onSubmit)}
+                >
+                  <Text style={themeController(styles.nextButtonText)}>
+                    {isSubmitting ? 'Processando...' : 'Finalizar Pedido'}
+                  </Text>
+                  {isSubmitting ? (
+                    <ActivityIndicator size={18} color={theme.colors.white} />
+                  ) : (
+                    <Feather
+                      name="check"
+                      size={18}
+                      color={theme.colors.white}
+                    />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </FormProvider>
+          </View>
+        )}
       </View>
     </ScrollView>
   );

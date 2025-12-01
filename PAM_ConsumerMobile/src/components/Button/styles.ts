@@ -4,28 +4,19 @@ import { theme } from '../../styles/theme';
 export const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
-    borderRadius: 96,
+    borderRadius: theme.borderRadius.lg,
     backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    height: 56,
-    paddingBottom: 5,
-    paddingTop: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: Platform.OS === 'ios' ? 0 : 0,
-    },
-    shadowOpacity: 0.58,
-    shadowRadius: Platform.OS === 'ios' ? 0 : 0,
-    elevation: Platform.OS === 'ios' ? 0 : 0,
-    gap: 16,
+    height: 54,
+    gap: theme.spacing.sm,
+    ...theme.shadows.md,
   },
 
   buttonText: {
     color: theme.colors.white,
-    fontFamily: theme.fonts.medium,
+    fontFamily: theme.fonts.semibold,
     lineHeight: 24,
     verticalAlign: 'middle',
     fontSize: 16,

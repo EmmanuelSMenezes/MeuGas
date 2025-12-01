@@ -19,19 +19,29 @@ import { useNavigation } from "@react-navigation/native";
 import { useGlobal } from "../../hooks/GlobalContext";
 import Payment from "payment";
 import { useThemeContext } from "../../hooks/themeContext";
+import { useAuth } from "../../hooks/AuthContext";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 const images = require("../../components/CreditCard/card-images");
 
 const validate = Payment.fns;
 
 const PaymentCard: React.FC = () => {
   const { consumerCards, getAllCards, deleteCard } = useUser();
-  const { navigate } = useNavigation();
+  const { user } = useAuth();
+  const { navigate, replace } = useNavigation<NativeStackNavigationProp<any>>();
   const { openAlert } = useGlobal();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [state, setState] = useState({ type: { name: "unknown", length: 16 } });
   const { dynamicTheme, setDynamicTheme, themeController } = useThemeContext();
 
   useEffect(() => {
+    // Verificar se o usuário está autenticado
+    if (!user?.user_id) {
+      console.log("❌ Payments - Usuário não autenticado, redirecionando para login");
+      replace("PhoneAuth");
+      return;
+    }
+    console.log("✅ Payments - Usuário autenticado:", user.user_id);
     getAllCards();
   }, []);
 
@@ -59,6 +69,11 @@ const PaymentCard: React.FC = () => {
       },
     });
   };
+
+  // Se não estiver autenticado, não renderiza nada
+  if (!user?.user_id) {
+    return null;
+  }
 
   return (
     <MenuProvider>

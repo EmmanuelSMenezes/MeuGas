@@ -5,6 +5,7 @@ import api from "../services/api";
 import { Categories } from "../interfaces/Category";
 import { Branch } from "../interfaces/Partner";
 import { ICatalog, IProduct } from "../interfaces/Catalog";
+import { getErrorMessage, logError, shouldShowError } from "../utils/errorHandler";
 
 interface CatalogProviderProps {
   children: React.ReactNode;
@@ -60,21 +61,14 @@ const CatalogProvider = ({ children }: CatalogProviderProps) => {
 
         return data;
       } catch (error) {
-        openAlert({
-          title: "Erro inesperado",
-          description: `${error?.response?.data?.message}`,
-          type: "error",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-          },
-        });
+        logError("CatalogContext.getProduct", error);
 
-        if (error.message === "Network Error") {
+        if (shouldShowError(error)) {
+          const errorMsg = getErrorMessage(error);
           openAlert({
-            title: "Sem conexão",
-            description: "Verifique sua conexão com a rede",
-            type: "error",
+            title: errorMsg.title,
+            description: errorMsg.description,
+            type: errorMsg.type,
             buttons: {
               confirmButtonTitle: "Ok",
               cancelButton: false,
@@ -114,21 +108,14 @@ const CatalogProvider = ({ children }: CatalogProviderProps) => {
 
         return data;
       } catch (error) {
-        openAlert({
-          title: "Erro inesperado",
-          description: `${error?.response?.data?.message}`,
-          type: "error",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-          },
-        });
+        logError("CatalogContext.getCategory", error);
 
-        if (error.message === "Network Error") {
+        if (shouldShowError(error)) {
+          const errorMsg = getErrorMessage(error);
           openAlert({
-            title: "Sem conexão",
-            description: "Verifique sua conexão com a rede",
-            type: "error",
+            title: errorMsg.title,
+            description: errorMsg.description,
+            type: errorMsg.type,
             buttons: {
               confirmButtonTitle: "Ok",
               cancelButton: false,

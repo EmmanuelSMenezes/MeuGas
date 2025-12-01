@@ -4,92 +4,109 @@ import { theme } from "../../styles/theme";
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    backgroundColor: theme.colors.white,
-    borderBottomEndRadius: 16,
-    borderBottomLeftRadius: 16,
+    backgroundColor: theme.colors.backgroundCard,
+    borderBottomEndRadius: theme.borderRadius.xl,
+    borderBottomLeftRadius: theme.borderRadius.xl,
     borderWidth: 1,
     borderTopWidth: 0,
-    borderColor: theme.colors.lightgray,
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    paddingBottom: 16,
+    borderColor: theme.colors.border,
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.sm,
+    paddingBottom: theme.spacing.md,
     width: "100%",
   },
 
   imageContainer: {
     position: "relative",
+    borderTopRightRadius: theme.borderRadius.xl,
+    borderTopLeftRadius: theme.borderRadius.xl,
+    overflow: "hidden",
   },
 
   cardImage: {
-    aspectRatio: 16 / 10,
-    borderTopRightRadius: 16,
-    borderTopLeftRadius: 16,
+    aspectRatio: 1,
+    borderTopRightRadius: theme.borderRadius.xl,
+    borderTopLeftRadius: theme.borderRadius.xl,
+    backgroundColor: theme.colors.lightgray,
   },
 
   title: {
-    color: theme.colors.black,
-    fontFamily: theme.fonts.bold,
-    fontSize: 16,
+    color: theme.colors.textDark,
+    fontFamily: theme.fonts.semibold,
+    fontSize: 15,
     lineHeight: 20,
-    marginBottom: 2
+    marginBottom: theme.spacing.xs,
+    marginTop: theme.spacing.xs,
   },
 
   descriptionContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginTop: theme.spacing.xs,
   },
 
   itemType: {
-    color: theme.colors.text,
+    color: theme.colors.textLight,
     fontFamily: theme.fonts.regular,
     fontSize: 12,
     lineHeight: 16,
+    marginBottom: theme.spacing.xs,
   },
 
   price: {
     color: theme.colors.primary,
     fontFamily: theme.fonts.bold,
-    fontSize: 20,
-    marginTop: 6,
+    fontSize: 18,
   },
 
   priceSymbol: {
     color: theme.colors.primary,
     fontFamily: theme.fonts.medium,
-    fontSize: 14,
+    fontSize: 13,
   },
 
   favoriteButton: {
     position: "absolute",
-    right: 6,
-    top: 6,
-    backgroundColor: theme.colors.shadowPrimary,
-    padding: 6,
-    borderRadius: 100,
+    right: theme.spacing.sm,
+    top: theme.spacing.sm,
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.sm,
+    borderRadius: theme.borderRadius.round,
     zIndex: 99,
+    ...theme.shadows.sm,
   },
 
   storeRating: {
     position: "absolute",
-    right: 6,
-    bottom: 6,
+    left: theme.spacing.sm,
+    bottom: theme.spacing.sm,
     backgroundColor: theme.colors.white,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    borderRadius: 40,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    gap: theme.spacing.xs,
+    borderRadius: theme.borderRadius.lg,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
     zIndex: 99,
-    elevation: 2,
+    ...theme.shadows.md,
   },
 
   storeRatingText: {
-    fontFamily: theme.fonts.regular,
-    color: theme.colors.text,
-    fontSize: 12,
-    lineHeight: 16,
+    fontFamily: theme.fonts.medium,
+    color: theme.colors.textDark,
+    fontSize: 11,
+    lineHeight: 14,
+  },
+
+  addButton: {
+    backgroundColor: theme.colors.primary,
+    width: 32,
+    height: 32,
+    borderRadius: theme.borderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    ...theme.shadows.md,
   },
 
 });

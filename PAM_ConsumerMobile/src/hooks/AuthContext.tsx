@@ -124,21 +124,14 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       //   }
       // })
     } catch (error) {
-      openAlert({
-        title: "Erro inesperado",
-        description: `${error?.response?.data?.message}`,
-        type: "error",
-        buttons: {
-          confirmButtonTitle: "Ok",
-          cancelButton: false,
-        },
-      });
+      logError("AuthContext.OTPSend", error);
 
-      if (error.message === "Network Error") {
+      if (shouldShowError(error)) {
+        const errorMsg = getErrorMessage(error);
         openAlert({
-          title: "Sem conexão",
-          description: "Verifique sua conexão com a rede",
-          type: "error",
+          title: errorMsg.title,
+          description: errorMsg.description,
+          type: errorMsg.type,
           buttons: {
             confirmButtonTitle: "Ok",
             cancelButton: false,
@@ -243,6 +236,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = useCallback(async () => {
     try {
+      console.log("🚪 Logout - Limpando dados do usuário...");
       setUser({} as User);
       setConsumer({} as Consumer);
       setUserLocation(undefined);
@@ -254,7 +248,12 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         "@PAM:cart",
         "@PAM:location",
       ]);
+
+      console.log("✅ Logout - Dados limpos, redirecionando para PhoneAuth");
+      // Redirecionar para a tela de login nova
+      navigate("PhoneAuth");
     } catch (error) {
+      console.log("❌ Erro ao fazer logout:", error);
       openAlert({
         title: "Erro inesperado",
         description: `${error?.response?.data?.message}`,
@@ -340,21 +339,14 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         },
       });
     } catch (error) {
-      openAlert({
-        title: "Erro inesperado",
-        description: `${error?.response?.data?.message}`,
-        type: "error",
-        buttons: {
-          confirmButtonTitle: "Ok",
-          cancelButton: false,
-        },
-      });
+      logError("AuthContext.updateUser", error);
 
-      if (error.message === "Network Error") {
+      if (shouldShowError(error)) {
+        const errorMsg = getErrorMessage(error);
         openAlert({
-          title: "Sem conexão",
-          description: "Verifique sua conexão com a rede",
-          type: "error",
+          title: errorMsg.title,
+          description: errorMsg.description,
+          type: errorMsg.type,
           buttons: {
             confirmButtonTitle: "Ok",
             cancelButton: false,
@@ -366,9 +358,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const loadStoragedUser = useCallback(async () => {
     try {
+      console.log("🔄 AuthContext - Carregando dados do AsyncStorage...");
       const storagedUser = await AsyncStorage.getItem("@PAM:user");
       const storagedConsumer = await AsyncStorage.getItem("@PAM:consumer");
       const storagedLocation = await AsyncStorage.getItem("@PAM:location");
+
+      console.log("📦 storagedUser:", storagedUser);
+      console.log("📦 storagedConsumer:", storagedConsumer);
 
       const userData = storagedUser ? JSON.parse(storagedUser) : null;
       const consumerData = storagedConsumer
@@ -378,13 +374,22 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         ? JSON.parse(storagedLocation)
         : null;
 
-      if (userData && consumerData) {
-        setConsumer(consumerData);
+      console.log("👤 userData parsed:", userData);
+      console.log("👤 consumerData parsed:", consumerData);
+
+      if (userData) {
         setUser(userData);
+        console.log("✅ User carregado no AuthContext");
+      }
+
+      if (consumerData) {
+        setConsumer(consumerData);
+        console.log("✅ Consumer carregado no AuthContext");
       }
 
       if (locationData) setUserLocation(locationData);
     } catch (error) {
+      console.error("❌ Erro ao carregar dados do AsyncStorage:", error);
       logWarning("AuthContext.loadStorageData", "Erro ao carregar dados do AsyncStorage");
     } finally {
       await SplashScreen.hideAsync();

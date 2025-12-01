@@ -33,7 +33,7 @@
     "production": {
       "developmentClient": false,
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "apk"
       },
       "ios": {},
       "channel": "production"

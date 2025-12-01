@@ -10,32 +10,34 @@ export const styles = StyleSheet.create({
     alignItems: 'flex-end',
     height: 70,
     bottom: 0,
-    backgroundColor: theme.colors.lightgray,
-    // marginHorizontal: width * 0.1
+    backgroundColor: theme.colors.white,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    paddingBottom: 8,
+    ...theme.shadows.lg,
   },
 
   tabBarButtonContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 6,
-    marginVertical: 12
+    marginHorizontal: 4,
+    marginVertical: 8,
   },
 
   tabBarButtonContainerFocused: {
-    borderTopWidth: 3,
-    borderColor: theme.colors.primary
+    borderTopWidth: 0,
   },
 
   tabBarButton: {
     flex: 1,
-    // marginVertical: 12
     paddingHorizontal: 12,
+    paddingVertical: 4,
   },
 
   tabBarButtonFocused: {
     backgroundColor: theme.colors.primary,
-    borderRadius: 32
+    borderRadius: theme.borderRadius.xl,
   },
 
   buttonContent: {
@@ -43,19 +45,20 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 8,
     flexDirection: 'row',
-    gap: 8,
-    width: 'auto'
+    gap: 6,
+    width: 'auto',
   },
 
   buttonTitle: {
-    fontFamily: theme.fonts.regular,
-    lineHeight: 20,
-    color: theme.colors.gray,
-
+    fontFamily: theme.fonts.medium,
+    lineHeight: 18,
+    fontSize: 12,
+    color: theme.colors.textLight,
   },
 
   buttonTitleFocused: {
-    color: theme.colors.white
+    color: theme.colors.white,
+    fontFamily: theme.fonts.semibold,
   },
 
   badgeFocusedPosition: {
@@ -70,15 +73,15 @@ export const styles = StyleSheet.create({
     right: width / 11,
     textAlign: 'center',
     alignSelf: 'center',
-    backgroundColor: theme.colors.secondary,
-    fontFamily: theme.fonts.regular,
-    borderRadius: 12,
+    backgroundColor: theme.colors.danger,
+    fontFamily: theme.fonts.medium,
+    borderRadius: theme.borderRadius.round,
     lineHeight: 14,
-    fontSize: 12,
+    fontSize: 11,
     minWidth: 18,
-    paddingHorizontal: 3,
+    paddingHorizontal: 4,
     height: 18,
-    paddingVertical: 3,
-    color: theme.colors.white
+    paddingVertical: 2,
+    color: theme.colors.white,
   }
 })

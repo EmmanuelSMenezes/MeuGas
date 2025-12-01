@@ -13,8 +13,10 @@ import SelectOrderShipping from "../Shared/SelectOrderShipping";
 import { useOrder } from "../../hooks/OrderContext";
 import { useUser } from "../../hooks/UserContext";
 import { useThemeContext } from "../../hooks/themeContext";
+import { useAuth } from "../../hooks/AuthContext";
 
 const Cart: React.FC = () => {
+  const { user } = useAuth();
   const { defaultAddress } = useUser();
   const {
     cart,
@@ -27,7 +29,17 @@ const Cart: React.FC = () => {
   } = useCart();
   const { dynamicTheme, themeController } = useThemeContext();
   const { getOrderPayment, setSelected, selected } = useOrder();
-  const { navigate } = useNavigation();
+  const { navigate, replace } = useNavigation();
+
+  // Verificar autenticação
+  useEffect(() => {
+    if (!user?.user_id) {
+      console.log("❌ Cart - Usuário não autenticado, redirecionando para login");
+      replace("PhoneAuth");
+      return;
+    }
+    console.log("✅ Cart - Usuário autenticado:", user.user_id);
+  }, []);
 
   const [showShippingWays, setShowShippingWays] = useState(false);
 
@@ -41,6 +53,11 @@ const Cart: React.FC = () => {
     }
     setSelected('')
   }, [cartBranch, defaultAddress]);
+
+  // Se não estiver autenticado, não renderiza nada
+  if (!user?.user_id) {
+    return null;
+  }
 
   return (
     <View style={themeController(globalStyles.container)}>

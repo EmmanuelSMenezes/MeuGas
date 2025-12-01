@@ -58,6 +58,24 @@ const UserProvider = ({ children }: UserProviderProps) => {
 
   const [consumerCards, setConsumerCards] = useState<ICard[]>([]);
 
+  // Carregar consumer do AsyncStorage quando o app inicia
+  useEffect(() => {
+    const loadConsumerFromStorage = async () => {
+      try {
+        const storagedConsumer = await AsyncStorage.getItem("@PAM:consumer");
+        if (storagedConsumer) {
+          const consumerData = JSON.parse(storagedConsumer);
+          console.log("📦 Consumer carregado do AsyncStorage:", consumerData);
+          setConsumer(consumerData);
+        }
+      } catch (error) {
+        console.error("❌ Erro ao carregar consumer do AsyncStorage:", error);
+      }
+    };
+
+    loadConsumerFromStorage();
+  }, []);
+
   const defaultAddress = userLocation
     ? userLocation
     : addresses.find(
@@ -109,21 +127,14 @@ const UserProvider = ({ children }: UserProviderProps) => {
 
         return data;
       } catch (error) {
-        openAlert({
-          title: "Erro inesperado",
-          description: `${error?.response?.data?.message}`,
-          type: "error",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-          },
-        });
+        logError("UserContext.getConsumer", error);
 
-        if (error.message === "Network Error") {
+        if (shouldShowError(error)) {
+          const errorMsg = getErrorMessage(error);
           openAlert({
-            title: "Sem conexão",
-            description: "Verifique sua conexão com a rede",
-            type: "error",
+            title: errorMsg.title,
+            description: errorMsg.description,
+            type: errorMsg.type,
             buttons: {
               confirmButtonTitle: "Ok",
               cancelButton: false,
@@ -460,21 +471,14 @@ const UserProvider = ({ children }: UserProviderProps) => {
 
       return response?.data;
     } catch (error) {
-      openAlert({
-        title: "Erro inesperado",
-        description: `Ocorreu um problema ao requisitar os cartões do usuário`,
-        type: "error",
-        buttons: {
-          confirmButtonTitle: "Ok",
-          cancelButton: false,
-        },
-      });
+      logError("UserContext.getAllCards", error);
 
-      if (error.message === "Network Error") {
+      if (shouldShowError(error)) {
+        const errorMsg = getErrorMessage(error);
         openAlert({
-          title: "Sem conexão",
-          description: "Verifique sua conexão com a rede",
-          type: "error",
+          title: errorMsg.title,
+          description: errorMsg.description || "Ocorreu um problema ao requisitar os cartões do usuário",
+          type: errorMsg.type,
           buttons: {
             confirmButtonTitle: "Ok",
             cancelButton: false,

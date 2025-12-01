@@ -15,6 +15,7 @@ import { MaterialIcons, Entypo, AntDesign } from "@expo/vector-icons";
 import ModalFilter from "../../components/ModalFilter";
 import { theme } from "../../styles/theme";
 import { useOffer } from "../../hooks/OfferContext";
+import { useProducts } from "../../hooks/ProductContext";
 import {
   IBranch,
   IBranches,
@@ -28,15 +29,28 @@ import SelectStoresOrderModal from "../Shared/SelectStoresOrderModal";
 import { TSortOptions } from "../../interfaces/Utils";
 import { goBack } from "../../routes/rootNavigation";
 import { useThemeContext } from "../../hooks/themeContext";
+import { useUser } from "../../hooks/UserContext";
+import { useGlobal } from "../../hooks/GlobalContext";
 
 const SearchResults: React.FC = () => {
   const { navigate } = useNavigation();
   const route = useRoute();
-  const { categoryType, partnerId, brandName } = route.params as {
-    categoryType?: string;
-    partnerId?: string;
+  const {
+    parentCategoryId,
+    parentCategoryName,
+    subcategoryId,
+    subcategoryName,
+    brandId,
+    brandName
+  } = route.params as {
+    parentCategoryId?: string;
+    parentCategoryName?: string;
+    subcategoryId?: string;
+    subcategoryName?: string;
+    brandId?: string;
     brandName?: string;
   };
+  const { getFilteredProducts: getProductsFiltered } = useProducts();
   const {
     searchText,
     setSearchText,
@@ -58,6 +72,8 @@ const SearchResults: React.FC = () => {
     orderStoresBy,
   } = useSearchFilter();
   const { dynamicTheme, themeController } = useThemeContext();
+  const { defaultAddress } = useUser();
+  const { openAlert, closeAlert } = useGlobal();
 
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showStoresOrderModal, setShowStoresOrderModal] = useState(false);
@@ -80,29 +96,48 @@ const SearchResults: React.FC = () => {
   };
 
   const getProducts = async () => {
-    const foundProducts = await getFilteredProducts();
+    // Usar ProductContext para filtrar produtos
+    const filteredProducts = getProductsFiltered({
+      parentCategoryId,
+      subcategoryId,
+      brandId,
+    });
 
-    setProductsFound(foundProducts);
+    setProductsFound({
+      products: filteredProducts,
+      pagination: {
+        currentPage: 1,
+        itensPerPage: filteredProducts.length,
+        totalPages: 1,
+        totalRows: filteredProducts.length,
+      }
+    });
   };
 
   const getStores = async (order?: StoreOrderOptions, sort?: TSortOptions) => {
-    const branches = await getFilteredStores(order, sort);
+    try {
+      const branches = await getFilteredStores(order, sort);
 
-    // Filtrar por partnerId se fornecido
-    if (partnerId && branches?.branches) {
-      const filteredBranches = branches.branches.filter(
-        branch => branch.partner_id === partnerId
-      );
-      setStoresFound({
-        ...branches,
-        branches: filteredBranches,
-        pagination: {
-          ...branches.pagination,
-          totalRows: filteredBranches.length
-        }
-      });
-    } else {
-      setStoresFound(branches);
+      // Filtrar por brandId se fornecido
+      if (brandId && branches?.branches) {
+        const filteredBranches = branches.branches.filter(
+          branch => branch.partner_id === brandId || branch.branch_id === brandId
+        );
+        setStoresFound({
+          ...branches,
+          branches: filteredBranches,
+          pagination: {
+            ...branches.pagination,
+            totalRows: filteredBranches.length
+          }
+        });
+      } else {
+        setStoresFound(branches);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar revendas:', error);
+      // Se não conseguir buscar revendas, continua sem elas
+      setStoresFound({ branches: [], pagination: { totalRows: 0, currentPage: 1, totalPages: 0 } });
     }
   };
 

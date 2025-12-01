@@ -12,13 +12,14 @@ import { MaskedText } from "react-native-mask-text";
 import { useGlobal } from "../../hooks/GlobalContext";
 import { useUser } from "../../hooks/UserContext";
 import { useThemeContext } from "../../hooks/themeContext";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 const Profile: React.FC = () => {
-  const { openAlert } = useGlobal();
-  const { getAllAddresses } = useUser();
+  const { openAlert, closeAlert } = useGlobal();
+  const { getAllAddresses, consumer } = useUser();
   const { logout, user, updateUser, photoProfile } = useAuth();
   const { dynamicTheme, setDynamicTheme, themeController } = useThemeContext();
-  const { navigate } = useNavigation();
+  const { navigate, replace } = useNavigation<NativeStackNavigationProp<any>>();
 
   const handleUserLogout = () => {
     openAlert({
@@ -30,6 +31,21 @@ const Profile: React.FC = () => {
       },
     });
   };
+
+  // Verificar se o usuário está autenticado
+  useEffect(() => {
+    if (!user?.user_id) {
+      console.log("❌ Profile - Usuário não autenticado, redirecionando para login");
+      replace("PhoneAuth");
+      return;
+    }
+    console.log("✅ Profile - Usuário autenticado:", user.user_id);
+  }, []);
+
+  // Se não estiver autenticado, não renderiza nada
+  if (!user?.user_id) {
+    return null;
+  }
 
   return (
     <View style={globalStyles.container}>

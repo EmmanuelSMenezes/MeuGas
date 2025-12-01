@@ -32,6 +32,16 @@ const SelectOrderShipping = ({
 
   const toggleModalVisible = () => setIsVisible((visible) => !visible);
 
+  // Log para debug
+  React.useEffect(() => {
+    if (isVisible) {
+      console.log("📦 SelectOrderShipping - Modal aberto");
+      console.log("📦 branchOrderSettings:", branchOrderSettings);
+      console.log("📦 shipping_options:", branchOrderSettings?.shipping_options);
+      console.log("📦 freight atual:", freight);
+    }
+  }, [isVisible, branchOrderSettings, freight]);
+
   return (
     <Modal
       statusBarTranslucent

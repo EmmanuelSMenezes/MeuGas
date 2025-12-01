@@ -20,6 +20,7 @@ import {
   ISearchFilters,
 } from "../interfaces/Offer";
 import { useUser } from "./UserContext";
+import { useLocation } from "./LocationContext";
 import { TSortOptions } from "../interfaces/Utils";
 import { getErrorMessage, logError, shouldShowError } from "../utils/errorHandler";
 
@@ -79,6 +80,10 @@ const OfferContext = createContext({} as OfferContextValues);
 const OfferProvider = ({ children }: OfferProviderProps) => {
   const { openAlert } = useGlobal();
   const { defaultAddress } = useUser();
+  const { currentLocation } = useLocation();
+
+  // Usar localização do GPS se usuário não estiver logado, senão usar endereço padrão
+  const activeLocation = defaultAddress || currentLocation;
 
   const getProductsByBranch = useCallback(
     async (
@@ -111,21 +116,14 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
 
         return data;
       } catch (error) {
-        openAlert({
-          title: "Erro inesperado",
-          description: `${error?.response?.data?.message}`,
-          type: "error",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-          },
-        });
+        logError("OfferContext.getProductsByBranch", error);
 
-        if (error.message === "Network Error") {
+        if (shouldShowError(error)) {
+          const errorMsg = getErrorMessage(error);
           openAlert({
-            title: "Sem conexão",
-            description: "Verifique sua conexão com a rede",
-            type: "error",
+            title: errorMsg.title,
+            description: errorMsg.description,
+            type: errorMsg.type,
             buttons: {
               confirmButtonTitle: "Ok",
               cancelButton: false,
@@ -153,8 +151,8 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
       shipping?: boolean,
     ): Promise<IOfferSearchedProducts> => {
       const queries = {
-        latitude: defaultAddress.latitude,
-        longitude: defaultAddress.longitude,
+        latitude: activeLocation?.latitude,
+        longitude: activeLocation?.longitude,
         filter,
         category_ids,
         branch_ids,
@@ -201,7 +199,7 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
         }
       }
     },
-    [defaultAddress]
+    [activeLocation]
   );
 
   const getStoresByLocation = useCallback(
@@ -213,8 +211,8 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
       itensPerPage?: number
     ): Promise<IBranches> => {
       const queries = {
-        latitude: defaultAddress?.latitude,
-        longitude: defaultAddress?.longitude,
+        latitude: activeLocation?.latitude,
+        longitude: activeLocation?.longitude,
         filter,
         page,
         itensPerPage,
@@ -226,9 +224,11 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
       if (__DEV__) {
         console.log('🔍 [OfferContext.getStoresByLocation] Buscando revendas...');
         console.log('📍 Coordenadas:', {
-          latitude: defaultAddress?.latitude,
-          longitude: defaultAddress?.longitude,
-          defaultAddress: defaultAddress
+          latitude: activeLocation?.latitude,
+          longitude: activeLocation?.longitude,
+          activeLocation: activeLocation,
+          defaultAddress: defaultAddress,
+          currentLocation: currentLocation
         });
       }
 
@@ -262,21 +262,20 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
 
         return data;
       } catch (error) {
-        // DEBUG: Log do erro
-        if (__DEV__) {
-          console.error('❌ Erro ao buscar revendas:', error);
-          console.error('Response:', error?.response?.data);
-        }
+        logError("OfferContext.getProductsByLocation", error);
 
-        openAlert({
-          title: "Erro ao buscar revendas",
-          description: error?.response?.data?.message || "Não foi possível carregar as revendas próximas",
-          type: "error",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-          },
-        });
+        if (shouldShowError(error)) {
+          const errorMsg = getErrorMessage(error);
+          openAlert({
+            title: errorMsg.title,
+            description: errorMsg.description || "Não foi possível carregar as revendas próximas",
+            type: errorMsg.type,
+            buttons: {
+              confirmButtonTitle: "Ok",
+              cancelButton: false,
+            },
+          });
+        }
 
         if (error.message === "Network Error") {
           openAlert({
@@ -291,7 +290,7 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
         }
       }
     },
-    [defaultAddress]
+    [activeLocation, defaultAddress, currentLocation]
   );
 
   const getStoreIsAvailable = useCallback(
@@ -301,8 +300,8 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
       longitude?: number
     ): Promise<boolean> => {
       const coords = {
-        latitude: latitude || defaultAddress.latitude,
-        longitude: longitude || defaultAddress.longitude,
+        latitude: latitude || activeLocation?.latitude,
+        longitude: longitude || activeLocation?.longitude,
       };
       try {
         const response = await api.get(
@@ -328,7 +327,7 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
         }
       }
     },
-    [defaultAddress]
+    [activeLocation]
   );
 
   const getFilterByLocation = useCallback(
@@ -338,8 +337,8 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
       longitude?: number
     ): Promise<ISearchFilters> => {
       const coords = {
-        latitude: latitude || defaultAddress.latitude,
-        longitude: longitude || defaultAddress.longitude,
+        latitude: latitude || activeLocation?.latitude,
+        longitude: longitude || activeLocation?.longitude,
       };
 
       try {
@@ -368,7 +367,7 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
         }
       }
     },
-    [defaultAddress]
+    [activeLocation]
   );
 
   const getPartnersByCategory = useCallback(

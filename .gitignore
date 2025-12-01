@@ -105,3 +105,14 @@ coverage/
 # Large files
 *.pdf
 *.sql
+
+# Configuration files with secrets
+**/appsettings.json
+**/appsettings.*.json
+**/.env
+**/.env.*
+**/secrets.yaml
+**/01-secrets.yaml
+**/*-secret.yaml
+**/kubeconfig.yaml
+**/*-kubeconfig.yaml

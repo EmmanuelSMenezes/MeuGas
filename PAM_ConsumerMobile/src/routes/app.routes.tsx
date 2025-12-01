@@ -16,12 +16,15 @@ import StoreDetails from "../screens/StoreDetails";
 import Profile from "../screens/Profile";
 import OTPVerification from "../screens/Shared/OTPVerification";
 import SignIn from "../screens/SignIn";
+import SignUp from "../screens/SignUp";
+import PhoneAuth from "../screens/PhoneAuth";
 import SearchResults from "../screens/SearchResults";
 import Checkout from "../screens/Checkout";
 import AddAddress from "../screens/Shared/AddAddress";
 import Addresses from "../screens/Addresses";
 import OTPVerificationForgotPassword from "../screens/Shared/OTPVerificationForgotPassword";
 import NewPassword from "../screens/Shared/NewPassword";
+import RecoverPassword from "../screens/RecoverPassword";
 import MyAccount from "../screens/Profile/MyAccount";
 import Support from "../screens/Profile/Support";
 import About from "../screens/Profile/Support/About";
@@ -39,6 +42,8 @@ import { useThemeContext } from "../hooks/themeContext";
 import PixPayment from "../screens/PixPayment";
 import RedoPayment from "../screens/RedoPayment";
 import CategorySelection from "../screens/CategorySelection";
+import CategoryHierarchy from "../screens/CategoryHierarchy";
+import SubcategorySelection from "../screens/SubcategorySelection";
 import BrandSelection from "../screens/BrandSelection";
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
@@ -175,24 +180,31 @@ const AppRoutes: React.FC = () => {
       screenOptions={{
         headerShown: false,
       }}
+      initialRouteName="Tabs"
     >
-      <Stack.Screen name="Tabs" component={TabNavigation} />
       <Stack.Screen name="CategorySelection" component={CategorySelection} />
+      <Stack.Screen name="CategoryHierarchy" component={CategoryHierarchy} />
+      <Stack.Screen name="SubcategorySelection" component={SubcategorySelection} />
       <Stack.Screen name="BrandSelection" component={BrandSelection} />
+      <Stack.Screen name="Tabs" component={TabNavigation} />
       <Stack.Screen name="Search" component={Search} />
       <Stack.Screen name="SearchResults" component={SearchResults} />
       <Stack.Screen name="ItemDetails" component={ItemDetails} />
       <Stack.Screen name="StoreDetails" component={StoreDetails} />
+
+      {/* Auth Screens - disponíveis quando necessário */}
+      <Stack.Screen name="PhoneAuth" component={PhoneAuth} />
+      <Stack.Screen name="SignIn" component={SignIn} />
+      <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="RecoverPassword" component={RecoverPassword} />
       <Stack.Screen name="OTPVerification" component={OTPVerification} />
+      <Stack.Screen name="OTPVerificationForgotPassword" component={OTPVerificationForgotPassword} />
+      <Stack.Screen name="NewPassword" component={NewPassword} />
+
       <Stack.Screen name="Cart" component={Cart} />
       <Stack.Screen name="Checkout" component={Checkout} />
       <Stack.Screen name="Addresses" component={Addresses} />
       <Stack.Screen name="AddAddress" component={AddAddress} />
-      <Stack.Screen
-        name="OTPVerificationForgotPassword"
-        component={OTPVerificationForgotPassword}
-      />
-      <Stack.Screen name="NewPassword" component={NewPassword} />
       <Stack.Screen name="Profile" component={Profile} />
       <Stack.Screen name="MyAccount" component={MyAccount} />
       <Stack.Screen name="Cam" component={Cam} />

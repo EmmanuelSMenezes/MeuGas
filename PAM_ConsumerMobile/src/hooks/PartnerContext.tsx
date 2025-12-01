@@ -3,6 +3,7 @@ import { REACT_APP_URL_MS_PARTNER } from "@env";
 import api from "../services/api";
 import { useGlobal } from "./GlobalContext";
 import { IStoreDetails } from "../interfaces/Store";
+import { getErrorMessage, logError, shouldShowError } from "../utils/errorHandler";
 
 interface PartnerProviderProps {
   children: React.ReactNode;
@@ -52,21 +53,14 @@ const PartnerProvider = ({ children }: PartnerProviderProps) => {
 
         return data;
       } catch (error) {
-        openAlert({
-          title: "Erro inesperado",
-          description: `${error?.response?.data?.message}`,
-          type: "error",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-          },
-        });
+        logError("PartnerContext.getStore", error);
 
-        if (error.message === "Network Error") {
+        if (shouldShowError(error)) {
+          const errorMsg = getErrorMessage(error);
           openAlert({
-            title: "Sem conexão",
-            description: "Verifique sua conexão com a rede",
-            type: "error",
+            title: errorMsg.title,
+            description: errorMsg.description,
+            type: errorMsg.type,
             buttons: {
               confirmButtonTitle: "Ok",
               cancelButton: false,

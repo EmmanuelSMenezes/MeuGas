@@ -1,0 +1,362 @@
+# PostgreSQL - Banco de dados principal
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: pam
+spec:
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgis/postgis:17-3.5-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: POSTGRES_DB
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: do-block-storage
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: pam
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+# RabbitMQ - Message Broker
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3.11-management-alpine
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_DEFAULT_USER
+        - name: RABBITMQ_DEFAULT_PASS
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_DEFAULT_PASS
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+  namespace: pam
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+  - name: amqp
+    port: 5672
+    targetPort: 5672
+  - name: management
+    port: 15672
+    targetPort: 15672
+---
+# MS Authentication
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-authentication
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-authentication
+  template:
+    metadata:
+      labels:
+        app: ms-authentication
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-authentication
+        image: registry.digitalocean.com/botpaporegistry/ms-authentication:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        - name: RabbitMQ__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_CONNECTION_STRING
+        - name: Jwt__Secret
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: JWT_SECRET
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-authentication
+  namespace: pam
+spec:
+  selector:
+    app: ms-authentication
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# MS Catalog
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-catalog
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-catalog
+  template:
+    metadata:
+      labels:
+        app: ms-catalog
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-catalog
+        image: registry.digitalocean.com/botpaporegistry/ms-catalog:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-catalog
+  namespace: pam
+spec:
+  selector:
+    app: ms-catalog
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# MS Offer
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-offer
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-offer
+  template:
+    metadata:
+      labels:
+        app: ms-offer
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-offer
+        image: registry.digitalocean.com/botpaporegistry/ms-offer:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-offer
+  namespace: pam
+spec:
+  selector:
+    app: ms-offer
+  ports:
+  - port: 80
+    targetPort: 80
+---
+# MS Communication
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-communication
+  namespace: pam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-communication
+  template:
+    metadata:
+      labels:
+        app: ms-communication
+    spec:
+      imagePullSecrets:
+      - name: registry-botpaporegistry
+      containers:
+      - name: ms-communication
+        image: registry.digitalocean.com/botpaporegistry/ms-communication:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        env:
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: DB_CONNECTION_STRING
+        - name: RabbitMQ__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: RABBITMQ_CONNECTION_STRING
+        - name: Twilio__AccountSid
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: TWILIO_ACCOUNT_SID
+        - name: Twilio__AuthToken
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: TWILIO_AUTH_TOKEN
+        - name: Twilio__PhoneNumber
+          valueFrom:
+            secretKeyRef:
+              name: pam-secrets
+              key: TWILIO_PHONE_NUMBER
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-communication
+  namespace: pam
+spec:
+  selector:
+    app: ms-communication
+  ports:
+  - port: 80
+    targetPort: 80
+

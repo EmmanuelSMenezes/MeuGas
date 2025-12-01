@@ -4,9 +4,10 @@ import { ICard } from "./User";
 import { IPixResponse, Order } from "./Order";
 
 export interface RootStackParamList extends ParamListBase {
+  PhoneAuth: undefined;
   SignIn: undefined;
   SignUp: undefined;
-  OTPVerification?: { phone: string };
+  OTPVerification?: { phone: string; name?: string };
   OTPVerificationForgotPassword: { phone: string };
   RecoverPassword: undefined;
   Tabs: undefined;

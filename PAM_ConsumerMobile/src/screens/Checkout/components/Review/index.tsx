@@ -40,7 +40,7 @@ const Review: React.FC = () => {
   const transshipment = Number(change);
   const transshipmentDiff = transshipment / 100 - totalAmount;
 
-  const selectedOrderShipping = branchOrderSettings.shipping_options.find(
+  const selectedOrderShipping = branchOrderSettings?.shipping_options?.find(
     ({ delivery_option_id }) => shipping_option === delivery_option_id
   );
 
@@ -64,101 +64,54 @@ const Review: React.FC = () => {
   return (
     <View>
       <Text style={themeController(globalStyles.subtitle)}>
-        Forma de entrega
-      </Text>
-      <Text style={themeController(globalStyles.description)}>
-        Confira se os dados de envio estão corretos
-      </Text>
-
-      <View style={themeController(orderStyles.informationContainer)}>
-        <Text style={themeController(orderStyles.recipientText)}>
-          {freight?.name.toLowerCase().indexOf("retirada") > -1
-            ? "Entregar"
-            : "Enviar"}{" "}
-          para{" "}
-          <Text style={themeController(globalStyles.textHighlight)}>
-            {user.profile.fullname}
-          </Text>
-        </Text>
-
-        <Text style={themeController(orderStyles.addressText)}>
-          {recipientAddress}
-        </Text>
-        <Text style={themeController(orderStyles.recipientText)}>
-          Entrega será feita por{" "}
-          <Text style={themeController(globalStyles.textHighlight)}>
-            {selectedOrderShipping.name}
-          </Text>
-        </Text>
-      </View>
-
-      <Text style={themeController(globalStyles.subtitle)}>
-        Forma de pagamento
-      </Text>
-      <Text style={themeController(globalStyles.description)}>
-        A transação será descontada da seguinte forma
-      </Text>
-
-      <View style={themeController(orderStyles.informationContainer)}>
-        <View style={themeController(orderStyles.purchaseInformationBeetween)}>
-          <Text style={themeController(globalStyles.textHighlight)}>
-            Método de pagamento:
-          </Text>
-          <Text style={themeController(orderStyles.paymentTitle)}>
-            {pay.find(({ item }) => item === payment_method).label}
-          </Text>
-        </View>
-        <View style={themeController(orderStyles.purchaseInformationBeetween)}>
-          <Text style={themeController(globalStyles.textHighlight)}>
-            Parcelamento:
-          </Text>
-          <Text style={themeController(orderStyles.paymentMethod)}>
-            {payment_card?.installments
-              ? payment_card?.installments
-              : "À vista"}
-          </Text>
-        </View>
-      </View>
-
-      <Text style={themeController(globalStyles.subtitle)}>
         Você está comprando
       </Text>
       <Text style={themeController(globalStyles.description)}>
         Estes são os itens que você inseriu no carrinho
       </Text>
       <View style={themeController(orderStyles.informationContainer)}>
-        {cart.map((item) => (
-          <View
-            key={item.product.product_id}
-            style={themeController(orderStyles.purchaseContainer)}
-          >
-            <View style={themeController(orderStyles.purchaseContent)}>
-              <Image
-                style={orderStyles.purchaseImage}
-                source={{
-                  uri: item.product.images.find(
-                    ({ product_image_id }) =>
-                      item.product.image_default === product_image_id
-                  ).url,
-                }}
-              />
-              <View>
-                <Text
-                  numberOfLines={1}
-                  style={themeController(orderStyles.purchaseName)}
-                >
-                  {item.product.name}
-                </Text>
-                <Text style={themeController(orderStyles.purchasePrice)}>
-                  {formatPrice(item.product.price)}
-                </Text>
+        {cart.map((item) => {
+          // Buscar a imagem padrão com verificação de segurança
+          const defaultImage = item.product.images?.find(
+            ({ product_image_id }) =>
+              item.product.image_default === product_image_id
+          );
+          const imageUrl = defaultImage?.url || item.product.images?.[0]?.url || '';
+
+          return (
+            <View
+              key={item.product.product_id}
+              style={themeController(orderStyles.purchaseContainer)}
+            >
+              <View style={themeController(orderStyles.purchaseContent)}>
+                {imageUrl ? (
+                  <Image
+                    style={orderStyles.purchaseImage}
+                    source={{ uri: imageUrl }}
+                  />
+                ) : (
+                  <View style={[orderStyles.purchaseImage, { backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }]}>
+                    <Text style={{ color: '#999', fontSize: 10 }}>Sem imagem</Text>
+                  </View>
+                )}
+                <View>
+                  <Text
+                    numberOfLines={1}
+                    style={themeController(orderStyles.purchaseName)}
+                  >
+                    {item.product.name}
+                  </Text>
+                  <Text style={themeController(orderStyles.purchasePrice)}>
+                    {formatPrice(item.product.price)}
+                  </Text>
+                </View>
               </View>
+              <Text style={themeController(orderStyles.purchaseQuantity)}>
+                {item.quantity}x
+              </Text>
             </View>
-            <Text style={themeController(orderStyles.purchaseQuantity)}>
-              {item.quantity}x
-            </Text>
-          </View>
-        ))}
+          );
+        })}
         <View style={themeController(orderStyles.purchaseInformationBeetween)}>
           <Text style={themeController(globalStyles.textHighlight)}>
             Frete:

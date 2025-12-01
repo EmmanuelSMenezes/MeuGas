@@ -1,86 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { styles } from './styles';
 import { useThemeContext } from '../../hooks/themeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../components/Header';
-import { useOffer } from '../../hooks/OfferContext';
-
-interface Brand {
-  partner_id: string;
-  fantasy_name: string;
-  logo_url?: string;
-}
+import { useProducts } from '../../hooks/ProductContext';
 
 const BrandSelection: React.FC = () => {
   const { navigate, goBack } = useNavigation();
   const route = useRoute();
-  const { categoryType } = route.params as { categoryType: string };
+  const {
+    parentCategoryId,
+    parentCategoryName,
+    subcategoryId,
+    subcategoryName
+  } = route.params as {
+    parentCategoryId: string;
+    parentCategoryName: string;
+    subcategoryId: string;
+    subcategoryName: string;
+  };
   const { dynamicTheme, themeController } = useThemeContext();
-  const { getPartnersByCategory } = useOffer();
+  const { getBrandsBySubcategory, isLoadingProducts } = useProducts();
 
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Buscar marcas que têm produtos nesta subcategoria
+  const brands = getBrandsBySubcategory(subcategoryId);
 
-  const categoryInfo = {
-    gas: {
-      name: 'Gás',
-      color: dynamicTheme.colors.primary,
-    },
-    water: {
-      name: 'Água',
-      color: dynamicTheme.colors.blue,
-    }
+  // Cor baseada na categoria pai
+  const getCategoryColor = (categoryName: string): string => {
+    const lowerName = categoryName.toLowerCase();
+    if (lowerName.includes('gás') || lowerName.includes('gas')) return dynamicTheme.colors.primary;
+    if (lowerName.includes('água') || lowerName.includes('agua')) return dynamicTheme.colors.blue;
+    return dynamicTheme.colors.secondary;
   };
 
-  const currentCategory = categoryInfo[categoryType as keyof typeof categoryInfo];
+  const categoryColor = getCategoryColor(parentCategoryName);
 
-  useEffect(() => {
-    loadBrands();
-  }, [categoryType]);
-
-  const loadBrands = async () => {
-    try {
-      setLoading(true);
-      // Aqui você vai buscar as marcas do backend filtradas por categoria
-      // Por enquanto, vou usar dados mockados
-      const mockBrands: Brand[] = [
-        { partner_id: '1', fantasy_name: 'Ultragaz', logo_url: 'https://meugas.app/images/logo.png' },
-        { partner_id: '2', fantasy_name: 'Liquigás', logo_url: 'https://meugas.app/images/logo.png' },
-        { partner_id: '3', fantasy_name: 'Supergasbras', logo_url: 'https://meugas.app/images/logo.png' },
-        { partner_id: '4', fantasy_name: 'Consigaz', logo_url: 'https://meugas.app/images/logo.png' },
-      ];
-      setBrands(mockBrands);
-    } catch (error) {
-      console.error('Erro ao carregar marcas:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBrandSelect = (brand: Brand) => {
-    navigate('SearchResults', { 
-      categoryType,
-      partnerId: brand.partner_id,
-      brandName: brand.fantasy_name
+  const handleBrandSelect = (brand: any) => {
+    navigate('SearchResults', {
+      parentCategoryId,
+      parentCategoryName,
+      subcategoryId,
+      subcategoryName,
+      brandId: brand.partner_id,
+      brandName: brand.branch_name
     });
   };
+
+  // Se não houver marcas, ir direto para produtos (sem filtro de marca)
+  useEffect(() => {
+    if (!isLoadingProducts && brands.length === 0) {
+      console.log('⚠️ Nenhuma marca encontrada, indo direto para produtos');
+      navigate('SearchResults', {
+        parentCategoryId,
+        parentCategoryName,
+        subcategoryId,
+        subcategoryName,
+        brandId: undefined, // Sem filtro de marca
+        brandName: 'Todas as marcas'
+      });
+    }
+  }, [brands.length, isLoadingProducts]);
 
   return (
     <SafeAreaView style={themeController(styles.container)} edges={['top']}>
       <View style={[
         themeController(styles.headerContainer),
-        { backgroundColor: currentCategory.color }
+        { backgroundColor: categoryColor }
       ]}>
         <Header backButton onPressBackButton={goBack}>
           <Text style={themeController(styles.headerTitle)}>
-            {currentCategory.name}
+            {subcategoryName}
           </Text>
         </Header>
       </View>
 
-      <ScrollView 
+      <ScrollView
         style={themeController(styles.content)}
         showsVerticalScrollIndicator={false}
       >
@@ -88,9 +85,23 @@ const BrandSelection: React.FC = () => {
           Escolha a marca
         </Text>
 
-        {loading ? (
+        {isLoadingProducts ? (
           <View style={themeController(styles.loadingContainer)}>
-            <ActivityIndicator size="large" color={currentCategory.color} />
+            <ActivityIndicator size="large" color={categoryColor} />
+            <Text style={themeController(styles.loadingText)}>
+              Carregando marcas...
+            </Text>
+          </View>
+        ) : brands.length === 0 ? (
+          <View style={themeController(styles.emptyContainer)}>
+            <MaterialCommunityIcons
+              name="store-off"
+              size={64}
+              color={dynamicTheme.colors.textLight}
+            />
+            <Text style={themeController(styles.emptyText)}>
+              Nenhuma marca disponível para esta categoria
+            </Text>
           </View>
         ) : (
           <View style={themeController(styles.brandsContainer)}>
@@ -99,23 +110,34 @@ const BrandSelection: React.FC = () => {
                 key={brand.partner_id}
                 style={[
                   themeController(styles.brandCard),
-                  { borderColor: currentCategory.color }
+                  { borderColor: categoryColor }
                 ]}
                 onPress={() => handleBrandSelect(brand)}
                 activeOpacity={0.7}
               >
-                {brand.logo_url && (
+                {brand.avatar ? (
                   <Image
-                    source={{ uri: brand.logo_url }}
+                    source={{ uri: brand.avatar }}
                     style={themeController(styles.brandLogo)}
                     resizeMode="contain"
                   />
+                ) : (
+                  <View style={[
+                    themeController(styles.brandLogoPlaceholder),
+                    { backgroundColor: categoryColor + '15' }
+                  ]}>
+                    <MaterialCommunityIcons
+                      name="store"
+                      size={40}
+                      color={categoryColor}
+                    />
+                  </View>
                 )}
                 <Text style={[
                   themeController(styles.brandName),
-                  { color: currentCategory.color }
+                  { color: categoryColor }
                 ]}>
-                  {brand.fantasy_name}
+                  {brand.branch_name}
                 </Text>
               </TouchableOpacity>
             ))}

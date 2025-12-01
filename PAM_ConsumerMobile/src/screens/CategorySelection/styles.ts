@@ -8,15 +8,17 @@ export const styles = StyleSheet.create({
   },
 
   headerContainer: {
-    backgroundColor: theme.colors.darker,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
+    backgroundColor: theme.colors.white,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
 
-  headerTitle: {
-    color: theme.colors.white,
-    fontSize: 20,
-    fontFamily: theme.fonts.medium,
+  logo: {
+    width: 150,
+    height: 60,
   },
 
   content: {
@@ -72,6 +74,35 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: theme.fonts.regular,
     color: theme.colors.gray,
+    textAlign: 'center',
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: theme.fonts.regular,
+    color: theme.colors.textLight,
+  },
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+
+  emptyText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: theme.fonts.regular,
+    color: theme.colors.textLight,
     textAlign: 'center',
   },
 });

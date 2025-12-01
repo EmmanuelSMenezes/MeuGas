@@ -222,8 +222,9 @@ namespace Infrastructure.Repository
 
           var insertedUser = connection.Query<Credentials>(sqlInsertUser).FirstOrDefault();
 
+          var documentValue = string.IsNullOrEmpty(createUserRequest.Document) ? "NULL" : $"'{createUserRequest.Document}'";
           var sqlInsertProfile = @$"INSERT INTO authentication.profile (fullname, document, user_id)
-                                  VALUES('{createUserRequest.Fullname}', '{createUserRequest.Document}', '{insertedUser.User_id}') RETURNING *;";
+                                  VALUES('{createUserRequest.Fullname}', {documentValue}, '{insertedUser.User_id}') RETURNING *;";
           var insertedProfile = connection.Query<Profile>(sqlInsertProfile).FirstOrDefault();
           var insertedAdmin = new Administrator();
           if (UserRole.ADM == createUserRequest.RoleName)

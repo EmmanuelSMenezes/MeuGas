@@ -38,6 +38,29 @@ export const styles = StyleSheet.create({
     paddingVertical: 60,
   },
 
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: theme.fonts.regular,
+    color: theme.colors.textLight,
+  },
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+
+  emptyText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontFamily: theme.fonts.regular,
+    color: theme.colors.textLight,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+
   brandsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -67,6 +90,15 @@ export const styles = StyleSheet.create({
   brandLogo: {
     width: 80,
     height: 80,
+    marginBottom: 12,
+  },
+
+  brandLogoPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 12,
   },
 

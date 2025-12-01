@@ -18,6 +18,7 @@ import {
 import { useGlobal } from "../../hooks/GlobalContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeContext } from "../../hooks/themeContext";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 const Addresses: React.FC = () => {
   const {
@@ -29,10 +30,11 @@ const Addresses: React.FC = () => {
     setUserLocation,
     defaultAddress,
   } = useUser();
+  const { user } = useAuth();
   const { dynamicTheme, themeController } = useThemeContext();
 
   const { openAlert } = useGlobal();
-  const { navigate, goBack } = useNavigation();
+  const { navigate, goBack, replace } = useNavigation<NativeStackNavigationProp<any>>();
 
   const [selectedAddress, setSelectedAddress] = useState<string>("");
 
@@ -63,6 +65,21 @@ const Addresses: React.FC = () => {
       },
     });
   };
+
+  // Verificar se o usuário está autenticado
+  useEffect(() => {
+    if (!user?.user_id) {
+      console.log("❌ Addresses - Usuário não autenticado, redirecionando para login");
+      replace("PhoneAuth");
+      return;
+    }
+    console.log("✅ Addresses - Usuário autenticado:", user.user_id);
+  }, []);
+
+  // Se não estiver autenticado, não renderiza nada
+  if (!user?.user_id) {
+    return null;
+  }
 
   return (
     <MenuProvider>

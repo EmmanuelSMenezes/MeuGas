@@ -38,7 +38,7 @@ interface PersonalDataForm {
 type DocumentMask = "" | "cpf" | "cnpj";
 
 const MyAccount: React.FC = () => {
-  const { goBack } = useNavigation<NativeStackNavigationProp<any>>();
+  const { goBack, replace } = useNavigation<NativeStackNavigationProp<any>>();
   const { openCam, setOpenCam } = useGlobal();
   const { user, updateUser, photoProfile, setPhotoProfile, loading } =
     useAuth();
@@ -102,6 +102,16 @@ const MyAccount: React.FC = () => {
 
   // console.log(consumer);
 
+  // Verificar se o usuário está autenticado
+  useEffect(() => {
+    if (!user?.user_id) {
+      console.log("❌ MyAccount - Usuário não autenticado, redirecionando para login");
+      replace("PhoneAuth");
+      return;
+    }
+    console.log("✅ MyAccount - Usuário autenticado:", user.user_id);
+  }, []);
+
   useEffect(() => {
     const backAction = () => {
       if (openCam) {
@@ -119,6 +129,11 @@ const MyAccount: React.FC = () => {
 
     return () => backHandler.remove();
   }, [openCam]);
+
+  // Se não estiver autenticado, não renderiza nada
+  if (!user?.user_id) {
+    return null;
+  }
 
   if (openCam)
     return (

@@ -42,24 +42,8 @@ const Routes: React.FC = () => {
     }
   };
 
-  const verifiyTokenExpiration = async () => {
-    api.interceptors.response.use(
-      (response) => response,
-
-      async (error) => {
-        if (error.response.status === 401) {
-          await AsyncStorage.clear();
-          logout();
-        }
-
-        return Promise.reject(error || "Something went wrong");
-      }
-    );
-  };
-
   useEffect(() => {
     verifiyPermissions();
-    verifiyTokenExpiration();
   }, []);
 
   return (
@@ -69,11 +53,8 @@ const Routes: React.FC = () => {
         setIsVisible={setRequestPermissionsModal}
         permissions={permissionsToRequest}
       />
-      {user?.user_id && user?.phone_verified && consumer?.consumer_id ? (
-        <AppRoutes />
-      ) : (
-        <AuthRoutes />
-      )}
+      {/* App sempre abre nas rotas principais, login só é necessário no checkout */}
+      <AppRoutes />
     </NavigationContainer>
   );
 };

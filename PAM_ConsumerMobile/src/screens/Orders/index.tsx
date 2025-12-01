@@ -25,9 +25,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { orderStyles } from "../../styles/orderStyles";
 import { useStatusContext } from "../../hooks/StatusContext";
 import { useThemeContext } from "../../hooks/themeContext";
+import { useAuth } from "../../hooks/AuthContext";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 const Orders: React.FC = () => {
   const { openAlert } = useGlobal();
+  const { user } = useAuth();
   const { consumer } = useUser();
   const { getAllOrders, getOrderStatusList, ordersHistory, setOrdersHistory } =
     useOrder();
@@ -36,7 +39,7 @@ const Orders: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { navigate } = useNavigation();
+  const { navigate, replace } = useNavigation<NativeStackNavigationProp<any>>();
 
   const { signalROrderConnection } = useStatusContext();
 
@@ -118,6 +121,14 @@ const Orders: React.FC = () => {
   };
 
   useEffect(() => {
+    // Verificar se o usuário está autenticado
+    if (!user?.user_id) {
+      console.log("❌ Orders - Usuário não autenticado, redirecionando para login");
+      replace("PhoneAuth");
+      return;
+    }
+
+    console.log("✅ Orders - Usuário autenticado:", user.user_id);
     onGetOrders();
     getOrderStatusList();
   }, []);

@@ -12,8 +12,10 @@ import { CommunicationProvider } from "../CommunicationContext";
 import { ChatProvider } from "../ChatContext";
 import { StatusProvider } from "../StatusContext";
 import { OfferProvider } from "../OfferContext";
+import { ProductProvider } from "../ProductContext";
 import { SearchFilterProvider } from "../SearchFilterContext";
 import { ThemeProvider } from "../themeContext";
+import { LocationProvider } from "../LocationContext";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -22,31 +24,35 @@ interface ProvidersProps {
 const Providers = ({ children }: ProvidersProps) => {
   return (
     <GlobalProvider>
-      <CommunicationProvider>
-        <UserProvider>
-          <AuthProvider>
-            <PartnerProvider>
-              <CatalogProvider>
-                <OfferProvider>
-                  <OrderProvider>
-                    <StatusProvider>
-                      <CartProvider>
-                        <SearchFilterProvider>
-                          <ReputationProvider>
-                            <ChatProvider>
-                              <ThemeProvider>{children}</ThemeProvider>
-                            </ChatProvider>
-                          </ReputationProvider>
-                        </SearchFilterProvider>
-                      </CartProvider>
-                    </StatusProvider>
-                  </OrderProvider>
-                </OfferProvider>
-              </CatalogProvider>
-            </PartnerProvider>
-          </AuthProvider>
-        </UserProvider>
-      </CommunicationProvider>
+      <LocationProvider>
+        <CommunicationProvider>
+          <UserProvider>
+            <AuthProvider>
+              <PartnerProvider>
+                <CatalogProvider>
+                  <OfferProvider>
+                    <ProductProvider>
+                      <OrderProvider>
+                        <StatusProvider>
+                          <CartProvider>
+                            <SearchFilterProvider>
+                              <ReputationProvider>
+                                <ChatProvider>
+                                  <ThemeProvider>{children}</ThemeProvider>
+                                </ChatProvider>
+                              </ReputationProvider>
+                            </SearchFilterProvider>
+                          </CartProvider>
+                        </StatusProvider>
+                      </OrderProvider>
+                    </ProductProvider>
+                  </OfferProvider>
+                </CatalogProvider>
+              </PartnerProvider>
+            </AuthProvider>
+          </UserProvider>
+        </CommunicationProvider>
+      </LocationProvider>
     </GlobalProvider>
   );
 };

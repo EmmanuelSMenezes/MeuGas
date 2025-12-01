@@ -196,22 +196,14 @@ const OrderProvider = ({ children }: OrderProviderProps) => {
 
         return data;
       } catch (error) {
-        // console.log(JSON.stringify(error));
-        openAlert({
-          title: "Erro inesperado",
-          description: `${error?.response?.data?.message}`,
-          type: "error",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-          },
-        });
+        logError("OrderContext.createOrder", error);
 
-        if (error.message === "Network Error") {
+        if (shouldShowError(error)) {
+          const errorMsg = getErrorMessage(error);
           openAlert({
-            title: "Sem conexão",
-            description: "Verifique sua conexão com a rede",
-            type: "error",
+            title: errorMsg.title,
+            description: errorMsg.description,
+            type: errorMsg.type,
             buttons: {
               confirmButtonTitle: "Ok",
               cancelButton: false,
@@ -234,21 +226,14 @@ const OrderProvider = ({ children }: OrderProviderProps) => {
         const { message, data } = response?.data;
         return data;
       } catch (error) {
-        openAlert({
-          title: "Erro inesperado",
-          description: `${error?.response?.data?.message}`,
-          type: "error",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-          },
-        });
+        logError("OrderContext.updateOrder", error);
 
-        if (error.message === "Network Error") {
+        if (shouldShowError(error)) {
+          const errorMsg = getErrorMessage(error);
           openAlert({
-            title: "Sem conexão",
-            description: "Verifique sua conexão com a rede",
-            type: "error",
+            title: errorMsg.title,
+            description: errorMsg.description,
+            type: errorMsg.type,
             buttons: {
               confirmButtonTitle: "Ok",
               cancelButton: false,
