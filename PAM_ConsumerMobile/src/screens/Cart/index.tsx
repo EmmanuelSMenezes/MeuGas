@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { FlatList, Text, View, TouchableOpacity } from "react-native";
-import { globalStyles } from "../../styles/globalStyles";
 import Purchase from "../../components/Purchase";
 import { useCart } from "../../hooks/CartContext";
 import { styles } from "./styles";
-import { Button, Header } from "../../components/Shared";
+import { Button } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { useNavigation } from "@react-navigation/native";
 import { formatPrice } from "../../utils/formatPrice";
 import { Feather, MaterialIcons, Entypo } from "@expo/vector-icons";
@@ -60,14 +60,14 @@ const Cart: React.FC = () => {
   }
 
   return (
-    <View style={themeController(globalStyles.container)}>
-      <Header />
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Carrinho" />
       <SelectOrderShipping
         isVisible={showShippingWays}
         setIsVisible={setShowShippingWays}
       />
-      <Text style={themeController(globalStyles.title)}>Seu carrinho</Text>
       <FlatList
+        style={styles.contentContainer}
         showsVerticalScrollIndicator={false}
         data={cart}
         ListHeaderComponent={

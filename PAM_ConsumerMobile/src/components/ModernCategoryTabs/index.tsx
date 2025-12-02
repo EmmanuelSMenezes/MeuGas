@@ -1,8 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useThemeContext } from '../../hooks/themeContext';
-import { styles } from './styles';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 interface Category {
   category_id: string;
@@ -13,81 +10,101 @@ interface ModernCategoryTabsProps {
   categories: Category[];
   selectedCategory: string | null;
   onCategoryChange: (categoryId: string) => void;
-  getCategoryColor: (description: string) => string;
-  getCategoryIcon: (description: string) => string;
+  getCategoryColor?: (description: string) => string;
+  getCategoryIcon?: (description: string) => string;
 }
+
+// Cor azul principal do segmented control
+const TINT_COLOR = '#007AFF';
 
 export const ModernCategoryTabs: React.FC<ModernCategoryTabsProps> = ({
   categories,
   selectedCategory,
   onCategoryChange,
-  getCategoryColor,
-  getCategoryIcon,
 }) => {
-  const { dynamicTheme } = useThemeContext();
-
-  const renderTab = (category: Category) => {
-    const isSelected = selectedCategory === category.category_id;
-    const color = getCategoryColor(category.description);
-    const icon = getCategoryIcon(category.description);
-
-    return (
-      <TouchableOpacity
-        key={category.category_id}
-        onPress={() => onCategoryChange(category.category_id)}
-        activeOpacity={0.7}
-        style={[
-          styles.tabCard,
-          {
-            backgroundColor: isSelected ? color : '#F5F5F5',
-            borderColor: isSelected ? color : '#E0E0E0',
-            shadowColor: isSelected ? color : '#000',
-            shadowOpacity: isSelected ? 0.3 : 0.1,
-            shadowRadius: isSelected ? 8 : 4,
-            shadowOffset: { width: 0, height: isSelected ? 4 : 2 },
-            elevation: isSelected ? 8 : 2,
-            transform: [{ scale: isSelected ? 1.02 : 1 }],
-          },
-        ]}
-      >
-        <View style={[
-          styles.iconContainer,
-          { backgroundColor: isSelected ? 'rgba(255,255,255,0.2)' : `${color}15` }
-        ]}>
-          <MaterialCommunityIcons
-            name={icon as any}
-            size={28}
-            color={isSelected ? '#FFFFFF' : color}
-          />
-        </View>
-
-        <Text
-          style={[
-            styles.tabText,
-            { color: isSelected ? '#FFFFFF' : '#333333' }
-          ]}
-          numberOfLines={1}
-        >
-          {category.description}
-        </Text>
-
-        {isSelected && (
-          <View style={[styles.selectedIndicator, { backgroundColor: '#FFFFFF' }]} />
-        )}
-      </TouchableOpacity>
-    );
-  };
+  if (categories.length === 0) {
+    return null;
+  }
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {categories.map((category) => renderTab(category))}
-      </ScrollView>
+    <View style={localStyles.container}>
+      <View style={localStyles.segmentedContainer}>
+        {categories.map((category, index) => {
+          const isSelected = selectedCategory === category.category_id;
+          const isFirst = index === 0;
+          const isLast = index === categories.length - 1;
+
+          return (
+            <TouchableOpacity
+              key={category.category_id}
+              activeOpacity={0.7}
+              onPress={() => onCategoryChange(category.category_id)}
+              style={[
+                localStyles.segment,
+                isSelected && localStyles.segmentSelected,
+                isFirst && localStyles.segmentFirst,
+                isLast && localStyles.segmentLast,
+              ]}
+            >
+              <Text
+                style={[
+                  localStyles.segmentText,
+                  isSelected && localStyles.segmentTextSelected,
+                ]}
+              >
+                {category.description}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 };
+
+const localStyles = StyleSheet.create({
+  container: {
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+  },
+  segmentedContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#E8E8E8',
+    borderRadius: 8,
+    padding: 2,
+  },
+  segment: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+  },
+  segmentSelected: {
+    backgroundColor: TINT_COLOR,
+    shadowColor: TINT_COLOR,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  segmentFirst: {
+    borderTopLeftRadius: 6,
+    borderBottomLeftRadius: 6,
+  },
+  segmentLast: {
+    borderTopRightRadius: 6,
+    borderBottomRightRadius: 6,
+  },
+  segmentText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333333',
+  },
+  segmentTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+});
 

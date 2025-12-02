@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View, Image, ScrollView } from "react-native";
-import { Header } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { globalStyles } from "../../styles/globalStyles";
 import RatingModal from "../Shared/RatingModal";
 import { styles } from "./styles";
 import { useRoute, RouteProp, ParamListBase } from "@react-navigation/native";
 import { Order } from "../../interfaces/Order";
 import { formatPrice } from "../../utils/formatPrice";
-import { MaskedText } from "react-native-mask-text";
 import { orderStyles } from "../../styles/orderStyles";
 import { useOrder } from "../../hooks/OrderContext";
 import Loading from "../../components/Loading";
-import { formatDate } from "../../utils/formatDate";
 import {
   MaterialCommunityIcons,
   Ionicons,
-  EvilIcons,
 } from "@expo/vector-icons";
-import { theme } from "../../styles/theme";
 import { useNavigation } from "@react-navigation/native";
 import { useGlobal } from "../../hooks/GlobalContext";
 import { useStatusContext } from "../../hooks/StatusContext";
@@ -158,19 +154,15 @@ const OrderDetails: React.FC = () => {
 
   if (!orderDetails?.order_id) return <Loading />;
   return (
-    <View style={themeController(themeController(globalStyles.container))}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Detalhes do pedido" />
+      <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
         <RatingModal
           isVisible={showRatingModal}
           setIsVisible={setShowRatingModal}
           onEvaluateStore={() => setCanEvaluate(false)}
           branchId={orderDetails?.partner.branch_id}
         />
-
-        <Header backButton />
-        <Text style={themeController(themeController(globalStyles.title))}>
-          Detalhes do pedido
-        </Text>
         {/* <Text style={orderStyles.orderCreatedAt}>Realizado em 12 de junho de 2023</Text> */}
 
         <View style={themeController(styles.orderResumeContainer)}>

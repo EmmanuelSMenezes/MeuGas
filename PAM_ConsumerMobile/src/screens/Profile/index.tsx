@@ -1,24 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
-import { globalStyles } from "../../styles/globalStyles";
+import React, { useEffect } from "react";
+import { ScrollView, Text, View, StatusBar } from "react-native";
 import { styles } from "./styles";
-import { theme } from "../../styles/theme";
 import Option from "./components/Option";
-import { Avatar, Header } from "../../components/Shared";
+import { Avatar } from "../../components/Shared";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../hooks/AuthContext";
 import { useNavigation } from "@react-navigation/native";
-import { MaskedText } from "react-native-mask-text";
 import { useGlobal } from "../../hooks/GlobalContext";
 import { useUser } from "../../hooks/UserContext";
 import { useThemeContext } from "../../hooks/themeContext";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 const Profile: React.FC = () => {
-  const { openAlert, closeAlert } = useGlobal();
+  const { openAlert } = useGlobal();
   const { getAllAddresses, consumer } = useUser();
-  const { logout, user, updateUser, photoProfile } = useAuth();
-  const { dynamicTheme, setDynamicTheme, themeController } = useThemeContext();
+  const { logout, user } = useAuth();
+  const { dynamicTheme, themeController } = useThemeContext();
   const { navigate, replace } = useNavigation<NativeStackNavigationProp<any>>();
 
   const handleUserLogout = () => {
@@ -30,6 +27,12 @@ const Profile: React.FC = () => {
         onConfirm: () => logout(),
       },
     });
+  };
+
+  // Obter inicial do nome do usuário
+  const getUserInitial = () => {
+    const name = consumer?.name || user?.name || user?.profile?.fullname || '';
+    return name.charAt(0).toUpperCase() || 'U';
   };
 
   // Verificar se o usuário está autenticado
@@ -48,26 +51,35 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <View style={globalStyles.container}>
-      <Header />
-      <View style={themeController(styles.profileHeader)}>
-        <Avatar
-          uri={user?.profile?.avatar}
-          size={120}
-          editable={false}
-          indicatorColor={dynamicTheme.colors.primary}
-        />
-        <Text style={[themeController(styles.userName)]}>
-          {user?.profile?.fullname}
-        </Text>
-        <MaskedText
-          style={[themeController(styles.userPhone)]}
-          mask="(99) 99999-9999"
-          children={user.phone}
-        />
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563EB" />
+
+      {/* Header Azul */}
+      <View style={styles.blueHeader}>
+        {/* Avatar pequeno no canto */}
+        <View style={styles.headerRow}>
+          <View style={styles.smallAvatar}>
+            <Text style={styles.smallAvatarText}>{getUserInitial()}</Text>
+          </View>
+        </View>
+
+        {/* Título */}
+        <Text style={styles.headerTitle}>Meu perfil</Text>
+
+        {/* Foto do usuário */}
+        <View style={styles.largeIconContainer}>
+          <Avatar
+            uri={user?.profile?.avatar}
+            size={80}
+            editable={false}
+            indicatorColor="#2563EB"
+          />
+        </View>
       </View>
 
-      <View style={themeController(styles.optionsContainer)}>
+      {/* Conteúdo */}
+      <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.optionsContainer}>
         <Option
           title="Meus dados"
           icon={
@@ -151,7 +163,8 @@ const Profile: React.FC = () => {
           style={themeController(styles.logoutSpacing)}
           onPress={() => handleUserLogout()}
         />
-      </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };

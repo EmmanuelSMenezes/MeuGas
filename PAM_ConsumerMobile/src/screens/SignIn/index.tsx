@@ -1,20 +1,17 @@
 import React from "react";
 import { Controller, useForm } from "react-hook-form";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import Button from "../../components/Button";
-import { Header, Input, PasswordInput } from "../../components/Shared";
+import { Input, PasswordInput } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { globalStyles } from "../../styles/globalStyles";
 import { MaterialIcons } from "@expo/vector-icons";
-import { theme } from "../../styles/theme";
 import { styles } from "./styles";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../hooks/AuthContext";
 import { navigate } from "../../routes/rootNavigation";
-import RequestPermissionsModal from "../Shared/RequestPermissionModal";
 import { useThemeContext } from "../../hooks/themeContext";
-import { Image, ImageSourcePropType } from 'react-native';
 import Logo from "./../../assets/img/logo.png";
 
 
@@ -44,20 +41,20 @@ const SignIn: React.FC = () => {
     await login(data);
   };
 
+  const logoComponent = (
+    <Image
+      source={Logo}
+      style={styles.headerLogo}
+      resizeMode="contain"
+    />
+  );
+
   return (
-    <View
-      style={[
-        themeController(globalStyles.container),
-        themeController(styles.container),
-      ]}
-    >
-      {/* <Header /> */}
-      <Image
-        source={Logo}
-        style={styles.logo}
-        resizeMode="contain"
-      /> 
-      <Text style={[themeController(styles.title)]}>Entrar</Text>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Entrar" showBackButton={false} centerComponent={logoComponent} />
+      <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.formContainer}>
+          <Text style={[themeController(styles.title)]}>Entrar</Text>
 
       <Controller
         name="email"
@@ -114,16 +111,18 @@ const SignIn: React.FC = () => {
         }
         onPress={handleSubmit(onSubmit)}
       />
-      <Text style={themeController(styles.signUpButton)}>
-        Não tem uma conta?{" "}
-        <Text
-          onPress={() => navigate("SignUp")}
-          style={themeController(globalStyles.textHighlight)}
-        >
-          Registre-se
-        </Text>
-      </Text>
-    </View> 
+          <Text style={themeController(styles.signUpButton)}>
+            Não tem uma conta?{" "}
+            <Text
+              onPress={() => navigate("SignUp")}
+              style={themeController(globalStyles.textHighlight)}
+            >
+              Registre-se
+            </Text>
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

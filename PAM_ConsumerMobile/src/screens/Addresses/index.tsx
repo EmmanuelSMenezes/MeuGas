@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Alert } from "react-native";
-import { Header, RadioButton } from "../../components/Shared";
-import { globalStyles } from "../../styles/globalStyles";
+import { RadioButton } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { useUser } from "../../hooks/UserContext";
 import { useAuth } from "../../hooks/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -83,16 +83,14 @@ const Addresses: React.FC = () => {
 
   return (
     <MenuProvider>
-      <View style={themeController(globalStyles.container)}>
+      <View style={styles.mainContainer}>
+        <BlueHeader title="Endereços" />
+
         <ScrollView
+          style={styles.contentContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Header backButton />
-          <Text style={themeController(globalStyles.title)}>
-            Seus endereços
-          </Text>
-
           <View style={themeController(styles.addressesContainer)}>
             {addresses.length > 0 ? (
               addresses?.map((item) => {

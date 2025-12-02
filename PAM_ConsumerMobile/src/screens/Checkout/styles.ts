@@ -2,11 +2,16 @@ import { StyleSheet } from 'react-native';
 import { theme } from '../../styles/theme';
 
 export const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+
   container: {
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'space-between',
-    backgroundColor: theme.colors.lightgray,
+    backgroundColor: '#FFFFFF',
   },
 
   header: {

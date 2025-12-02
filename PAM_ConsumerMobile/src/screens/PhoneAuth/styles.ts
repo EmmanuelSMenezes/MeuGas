@@ -1,53 +1,83 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { theme } from '../../styles/theme';
 
+const { width } = Dimensions.get('window');
+
 export const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
-    paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.xl,
-    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+
+  blueHeader: {
+    backgroundColor: '#2563EB',
+    paddingTop: 50,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+  backButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: theme.fonts.medium,
+    marginLeft: 8,
   },
 
   logo: {
-    width: 200,
-    height: 80,
+    width: 180,
+    height: 60,
     alignSelf: 'center',
-    marginBottom: theme.spacing.xl,
+    tintColor: '#FFFFFF',
   },
 
-  title: {
-    fontSize: 28,
-    fontFamily: theme.fonts.bold,
-    color: theme.colors.textDark,
-    marginBottom: theme.spacing.sm,
-    textAlign: 'center',
+  formContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    marginTop: -20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
 
-  subtitle: {
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 30,
+    paddingBottom: 40,
+  },
+
+  inputLabel: {
     fontSize: 14,
-    fontFamily: theme.fonts.regular,
-    color: theme.colors.textLight,
-    marginBottom: theme.spacing.xl,
-    textAlign: 'center',
-    lineHeight: 20,
+    fontFamily: theme.fonts.medium,
+    color: '#333333',
+    marginBottom: 8,
+    marginTop: 8,
   },
 
-  inputSpacing: {
-    marginBottom: theme.spacing.md,
+  inputWrapper: {
+    marginBottom: 16,
   },
 
-  signInButton: {
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
+  input: {
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 0,
   },
 
-  signUpButton: {
-    fontSize: 14,
-    fontFamily: theme.fonts.regular,
-    color: theme.colors.textLight,
-    textAlign: 'center',
-    marginTop: theme.spacing.md,
+  submitButton: {
+    backgroundColor: '#F97316',
+    marginTop: 16,
+    marginBottom: 20,
+    borderRadius: 8,
+    height: 50,
   },
 });
 

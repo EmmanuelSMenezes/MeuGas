@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 import { styles } from './styles';
 import Card from '../../components/Card';
-import { globalStyles } from '../../styles/globalStyles';
+import { BlueHeader } from '../../components/BlueHeader';
 import { useNavigation } from '@react-navigation/native'
 
 const WishList: React.FC = () => {
@@ -113,27 +113,26 @@ const WishList: React.FC = () => {
   const { navigate } = useNavigation();
 
   return (
-    <View style={globalStyles.container} >
-
-      <FlatList
-        numColumns={2}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <Text style={globalStyles.title}>Lista de desejos</Text>
-        }
-        columnWrapperStyle={styles.listColumnStyle}
-        contentContainerStyle={styles.listContainer}
-        data={wishList}
-        renderItem={({ item }) =>
-          <Card
-            item={item}
-            favorited={true}
-            style={styles.cardSize}
-            onPress={() => navigate('ItemDetails', item)}
-          />
-        }
-      />
-    </View >
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Lista de desejos" />
+      <View style={styles.contentContainer}>
+        <FlatList
+          numColumns={2}
+          showsVerticalScrollIndicator={false}
+          columnWrapperStyle={styles.listColumnStyle}
+          contentContainerStyle={styles.listContainer}
+          data={wishList}
+          renderItem={({ item }) =>
+            <Card
+              item={item}
+              favorited={true}
+              style={styles.cardSize}
+              onPress={() => navigate('ItemDetails', item)}
+            />
+          }
+        />
+      </View>
+    </View>
   );
 }
 

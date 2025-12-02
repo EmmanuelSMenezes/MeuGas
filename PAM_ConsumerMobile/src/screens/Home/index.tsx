@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons, Fontisto } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Fontisto, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { styles } from './styles';
 import { useThemeContext } from '../../hooks/themeContext';
@@ -9,7 +9,6 @@ import { useProducts } from '../../hooks/ProductContext';
 import { useUser } from '../../hooks/UserContext';
 import { useAuth } from '../../hooks/AuthContext';
 import { useGlobal } from '../../hooks/GlobalContext';
-import { Card } from '../../components/Shared';
 import SelectLocationModal from '../Shared/SelectLocationModal';
 import { ModernCategoryTabs } from '../../components/ModernCategoryTabs';
 import { ProductListItem } from '../../components/ProductListItem';
@@ -219,44 +218,74 @@ const Home: React.FC = () => {
     );
   }
 
+  // Formatar endereço para exibição
+  const formatAddress = () => {
+    if (!defaultAddress) return 'Selecione um endereço';
+    const street = defaultAddress.street || '';
+    const city = defaultAddress.city || '';
+    if (street && city) {
+      // Truncar rua se muito longa
+      const truncatedStreet = street.length > 20 ? street.substring(0, 20) + '..' : street;
+      return `${truncatedStreet} - ${city}`;
+    }
+    return street || city || 'Selecione um endereço';
+  };
+
+  // Obter inicial do nome do usuário
+  const getUserInitial = () => {
+    const name = consumer?.name || user?.name || '';
+    return name.charAt(0).toUpperCase() || 'U';
+  };
+
   return (
-    <SafeAreaView style={themeController(styles.container)} edges={['top']}>
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563EB" />
+
       <SelectLocationModal
         isVisible={isSelectLocationModalVisible}
         setIsVisible={setIsSelectLocationModalVisible}
       />
 
-      {/* Header com localização */}
-      <TouchableOpacity
-        onPress={() => setIsSelectLocationModalVisible(true)}
-        style={themeController(styles.headerAddressContainer)}
-      >
-        <View style={themeController(styles.headerAddressContent)}>
-          <Fontisto name="map-marker-alt" size={16} color={dynamicTheme.colors.primary} />
-          <View style={themeController(styles.headerAddressTextContainer)}>
-            <Text style={themeController(styles.headerAddressLabel)}>Entregar em</Text>
-            <Text style={themeController(styles.headerAddressText)} numberOfLines={1}>
-              {defaultAddress?.street || 'Selecione um endereço'}
-            </Text>
+      {/* Header Azul com Endereço */}
+      <View style={styles.blueHeader}>
+        <TouchableOpacity
+          onPress={() => setIsSelectLocationModalVisible(true)}
+          style={styles.addressRow}
+        >
+          {/* Avatar */}
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{getUserInitial()}</Text>
           </View>
-        </View>
-        <MaterialCommunityIcons name="chevron-down" size={24} color={dynamicTheme.colors.textDark} />
-      </TouchableOpacity>
 
-      {/* Tabs de categorias */}
-      {parentCategories.length > 0 ? (
-        <View style={{ flex: 1 }}>
-          {/* Modern Category Tabs */}
-          <ModernCategoryTabs
-            categories={parentCategories}
-            selectedCategory={selectedParentCategory}
-            onCategoryChange={(categoryId) => {
-              setSelectedParentCategory(categoryId);
-              setSelectedSubcategory(null);
-            }}
-            getCategoryColor={getCategoryColor}
-            getCategoryIcon={getCategoryIcon}
-          />
+          {/* Endereço */}
+          <Text style={styles.addressText} numberOfLines={1}>
+            {formatAddress()}
+          </Text>
+
+          {/* Chevron */}
+          <MaterialIcons name="keyboard-arrow-down" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        {/* Título Produtos */}
+        <Text style={styles.headerTitle}>Produtos</Text>
+      </View>
+
+      {/* Conteúdo */}
+      <View style={styles.contentContainer}>
+        {/* Tabs de categorias */}
+        {parentCategories.length > 0 ? (
+          <View style={{ flex: 1 }}>
+            {/* Modern Category Tabs */}
+            <ModernCategoryTabs
+              categories={parentCategories}
+              selectedCategory={selectedParentCategory}
+              onCategoryChange={(categoryId) => {
+                setSelectedParentCategory(categoryId);
+                setSelectedSubcategory(null);
+              }}
+              getCategoryColor={getCategoryColor}
+              getCategoryIcon={getCategoryIcon}
+            />
 
           {/* Tab Content */}
           <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
@@ -345,13 +374,14 @@ const Home: React.FC = () => {
             </View>
           </ScrollView>
         </View>
-      ) : (
-        <View style={themeController(styles.loadingContainer)}>
-          <ActivityIndicator size="large" color={dynamicTheme.colors.primary} />
-          <Text style={themeController(styles.loadingText)}>Carregando categorias...</Text>
-        </View>
-      )}
-    </SafeAreaView>
+        ) : (
+          <View style={themeController(styles.loadingContainer)}>
+            <ActivityIndicator size="large" color={dynamicTheme.colors.primary} />
+            <Text style={themeController(styles.loadingText)}>Carregando categorias...</Text>
+          </View>
+        )}
+      </View>
+    </View>
   );
 };
 

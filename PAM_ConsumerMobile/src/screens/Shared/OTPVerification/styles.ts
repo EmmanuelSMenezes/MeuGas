@@ -2,60 +2,112 @@ import { StyleSheet } from 'react-native';
 import { theme } from '../../../styles/theme';
 
 export const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+  },
+
+  blueHeader: {
+    backgroundColor: '#2563EB',
+    paddingTop: 50,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+  backButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 24
+    marginBottom: 20,
   },
 
-  title: {
-    color: theme.colors.primary,
-    fontSize: 24,
-    textAlign: 'center',
+  backButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
     fontFamily: theme.fonts.medium,
+    marginLeft: 8,
   },
 
-  subtitle: {
-    color: theme.colors.text,
+  logo: {
+    width: 180,
+    height: 60,
+    alignSelf: 'center',
+    tintColor: '#FFFFFF',
+  },
+
+  formContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    marginTop: -20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+
+  scrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 30,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+
+  formTitle: {
+    fontSize: 18,
+    fontFamily: theme.fonts.semiBold,
+    color: '#333333',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+
+  formSubtitle: {
+    fontSize: 14,
     fontFamily: theme.fonts.regular,
-    textAlign: 'center'
+    color: '#666666',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+
+  phoneNumber: {
+    fontSize: 18,
+    fontFamily: theme.fonts.semiBold,
+    color: '#2563EB',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+
+  otpContainer: {
+    marginBottom: 24,
   },
 
   resendCodeContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 4
+    marginBottom: 24,
   },
 
   resendCodeTitle: {
-    color: theme.colors.gray,
-    fontFamily: theme.fonts.medium,
+    fontSize: 14,
+    color: '#666666',
+    fontFamily: theme.fonts.regular,
+    marginBottom: 8,
   },
 
   resendCodeButtonText: {
-    fontFamily: theme.fonts.regular,
+    fontFamily: theme.fonts.medium,
     textDecorationLine: 'underline',
-    textDecorationColor: theme.colors.primary,
-    textDecorationStyle: 'solid',
-    fontSize: 16,
-    color: theme.colors.primary
+    fontSize: 14,
+    color: '#2563EB',
   },
 
-  confirmButton: {
-    marginTop: 24,
-  },
-
-  resendCodeTimer: {
-    fontFamily: theme.fonts.regular,
-    color: theme.colors.text,
-    textAlign: 'center'
-    // marginBottom: 8
+  submitButton: {
+    backgroundColor: '#F97316',
+    borderRadius: 8,
+    height: 50,
+    width: '100%',
   },
 
   disabledButton: {
-    opacity: 0.3,
-    color: theme.colors.black
-  }
-
+    opacity: 0.5,
+  },
 });

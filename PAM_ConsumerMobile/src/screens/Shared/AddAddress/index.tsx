@@ -5,9 +5,9 @@ import {
   Input,
   MaskedInput,
   Button,
-  Header,
   Select,
 } from "../../../components/Shared";
+import { BlueHeader } from "../../../components/BlueHeader";
 import { styles } from "./styles";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -170,13 +170,12 @@ const AddAddress: React.FC<RootStackParams<"AddAddress">> = ({ route }) => {
     if (addressToEdit) onGetAddressToEdit();
   }, []);
 
+  const headerTitle = addressToEdit ? "Editar endereço" : "Novo endereço";
+
   return (
-    <View style={themeController(globalStyles.container)}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Header backButton />
-        <Text style={themeController(globalStyles.title)}>
-          {addressToEdit ? "Editar endereço" : "Adicionar novo endereço"}
-        </Text>
+    <View style={styles.mainContainer}>
+      <BlueHeader title={headerTitle} />
+      <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
 
         <TouchableOpacity
           onPress={() => handleGetUserAddress()}

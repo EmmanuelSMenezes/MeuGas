@@ -3,18 +3,16 @@ import {
   Text,
   TouchableOpacity,
   View,
-  FlatList,
   Image,
   ScrollView,
   ActivityIndicator,
 } from "react-native";
 import {
   Button,
-  Header,
-  Input,
   MaskedInput,
   RadioButton,
 } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { styles } from "./styles";
 import Select, { IData } from "../../components/Select";
 import { Controller, useForm } from "react-hook-form";
@@ -24,7 +22,6 @@ import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { useUser } from "../../hooks/UserContext";
 import { formatCardNumber } from "../../utils/formatCardNumber";
 import {
-  ParamListBase,
   RouteProp,
   useNavigation,
   useRoute,
@@ -309,22 +306,20 @@ const RedoPayment = () => {
   }, []);
 
   return (
-    <ScrollView
-      contentContainerStyle={{ minHeight: "100%" }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={themeController(styles.container)}>
-        <CardCodeModal
-          isVisible={showCardCodeModal}
-          setIsVisible={setShowCardCodeModal}
-          onChangeCardCode={setCardCode}
-          onSubmitCardCode={handleSubmit(onSubmit)}
-        />
-
-        <View>
-          <Header backButton />
-          <Text style={themeController(styles.title)}>Realizar pagamento</Text>
-        </View>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Realizar pagamento" />
+      <ScrollView
+        contentContainerStyle={{ minHeight: "100%" }}
+        showsVerticalScrollIndicator={false}
+        style={styles.contentContainer}
+      >
+        <View style={themeController(styles.container)}>
+          <CardCodeModal
+            isVisible={showCardCodeModal}
+            setIsVisible={setShowCardCodeModal}
+            onChangeCardCode={setCardCode}
+            onSubmitCardCode={handleSubmit(onSubmit)}
+          />
 
         <View style={themeController(styles.paymentsContainer)}>
           <Text style={themeController(globalStyles.subtitle)}>
@@ -535,26 +530,27 @@ const RedoPayment = () => {
           </View>
         )}
 
-        <TouchableOpacity
-          disabled={isSubmitting}
-          style={[themeController(styles.submitButton)]}
-          onPress={() => handleValidateBeforeSubmit()}
-        >
-          <Text style={themeController(styles.submitButtonText)}>
-            Confirmar
-          </Text>
-          {isSubmitting ? (
-            <ActivityIndicator size={18} color={dynamicTheme.colors.white} />
-          ) : (
-            <Feather
-              name="chevron-right"
-              size={16}
-              color={dynamicTheme.colors.white}
-            />
-          )}
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity
+            disabled={isSubmitting}
+            style={[themeController(styles.submitButton)]}
+            onPress={() => handleValidateBeforeSubmit()}
+          >
+            <Text style={themeController(styles.submitButtonText)}>
+              Confirmar
+            </Text>
+            {isSubmitting ? (
+              <ActivityIndicator size={18} color={dynamicTheme.colors.white} />
+            ) : (
+              <Feather
+                name="chevron-right"
+                size={16}
+                color={dynamicTheme.colors.white}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

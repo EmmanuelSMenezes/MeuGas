@@ -7,11 +7,11 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
-import { globalStyles } from "../../styles/globalStyles";
-import { Header } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { useGlobal } from "../../hooks/GlobalContext";
 import { styles } from "./styles";
 import { theme } from "../../styles/theme";
+import { globalStyles } from "../../styles/globalStyles";
 import { useOrder } from "../../hooks/OrderContext";
 import { useUser } from "../../hooks/UserContext";
 import {
@@ -178,14 +178,12 @@ const Orders: React.FC = () => {
   }, [signalROrderConnection && ordersHistory?.orders?.length > 0]);
 
   return (
-    <View style={globalStyles.container}>
-      <Header backButton />
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Pedidos" />
 
       <FlatList
+        style={styles.contentContainer}
         data={ordersHistory?.orders}
-        ListHeaderComponent={
-          <Text style={globalStyles.title}>Seus pedidos</Text>
-        }
         ListEmptyComponent={
           !isLoading && (
             <Text style={globalStyles.listEmpty}>

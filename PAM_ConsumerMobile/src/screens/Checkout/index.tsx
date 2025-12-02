@@ -6,7 +6,8 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-import { Button, Header, Steps, Input } from "../../components/Shared";
+import { Button, Steps, Input } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { styles } from "./styles";
 import Review from "./components/Review";
 import Address from "./components/Address";
@@ -122,6 +123,9 @@ const Checkout: React.FC = () => {
     console.log("📦 Checkout - getPayment chamado");
     console.log("📦 cartBranch:", cartBranch);
     console.log("📦 cartBranch?.branch_id:", cartBranch?.branch_id);
+    console.log("📦 defaultAddress:", defaultAddress);
+    console.log("📦 defaultAddress?.latitude:", defaultAddress?.latitude);
+    console.log("📦 defaultAddress?.longitude:", defaultAddress?.longitude);
 
     if (!cartBranch?.branch_id) {
       console.log("❌ Checkout - branch_id não disponível, abortando getPayment");
@@ -129,13 +133,31 @@ const Checkout: React.FC = () => {
       return;
     }
 
+    if (!defaultAddress?.latitude || !defaultAddress?.longitude) {
+      console.log("❌ Checkout - Coordenadas do endereço não disponíveis, abortando getPayment");
+      setIsLoadingPayments(false);
+      return;
+    }
+
     try {
       setIsLoadingPayments(true);
-      const data = await getOrderPayment(cartBranch?.branch_id);
+      console.log("🚀 Chamando getOrderPayment com:", {
+        branch_id: cartBranch.branch_id,
+        latitude: defaultAddress.latitude,
+        longitude: defaultAddress.longitude
+      });
+      const data = await getOrderPayment(
+        cartBranch.branch_id,
+        defaultAddress.latitude,
+        defaultAddress.longitude
+      );
       console.log("📦 Dados de pagamento recebidos:", data);
+      console.log("📦 shipping_options:", data?.shipping_options);
+      console.log("📦 payment_options:", data?.payment_options);
       setPayments(data);
     } catch (error) {
       console.log("❌ Erro ao carregar pagamentos:", error);
+      console.log("❌ Detalhes do erro:", JSON.stringify(error, null, 2));
     } finally {
       setIsLoadingPayments(false);
     }
@@ -388,22 +410,19 @@ const Checkout: React.FC = () => {
   }, [isLoadingPayments, payments, defaultAddress]);
 
   return (
-    <ScrollView
-      contentContainerStyle={{ minHeight: "100%" }}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={themeController(styles.container)}>
-        <UnavailableStoreModal
-          title="Loja indisponível"
-          description="No momento, esta loja se encontra indisponível para receber novos pedidos devido ao horário."
-          isVisible={showUnavailableStoreModal}
-          setIsVisible={setShowUnavailableStoreModal}
-        />
-
-        <View style={themeController(styles.header)}>
-          <Header backButton />
-          <Text style={themeController(styles.title)}>Finalizar Pedido</Text>
-        </View>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Finalizar Pedido" />
+      <UnavailableStoreModal
+        title="Loja indisponível"
+        description="No momento, esta loja se encontra indisponível para receber novos pedidos devido ao horário."
+        isVisible={showUnavailableStoreModal}
+        setIsVisible={setShowUnavailableStoreModal}
+      />
+      <ScrollView
+        contentContainerStyle={{ minHeight: "100%" }}
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 1, paddingHorizontal: 16 }}
+      >
 
         {isLoading ? (
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 }}>
@@ -646,8 +665,8 @@ const Checkout: React.FC = () => {
             </FormProvider>
           </View>
         )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 

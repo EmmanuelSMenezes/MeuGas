@@ -15,12 +15,9 @@ import { Feather } from "@expo/vector-icons";
 import {
   ParamListBase,
   RouteProp,
-  useIsFocused,
   useNavigation,
-  useNavigationState,
   useRoute,
 } from "@react-navigation/native";
-import { theme } from "../../styles/theme";
 import Button from "../../components/Button";
 import { useCart } from "../../hooks/CartContext";
 import Carousel from "react-native-reanimated-carousel";
@@ -35,6 +32,7 @@ import { useCatalog } from "../../hooks/CatalogContext";
 import { useOffer } from "../../hooks/OfferContext";
 import UnavailableStoreModal from "../Shared/UnavailableStoreModal";
 import { useThemeContext } from "../../hooks/themeContext";
+import { BlueHeader } from "../../components/BlueHeader";
 
 interface RouteParams extends RouteProp<ParamListBase> {
   params: {
@@ -120,26 +118,15 @@ const ItemDetails: React.FC = () => {
 
   if (!productDetails) return <Loading />;
   return (
-    <View style={themeController(styles.container)}>
+    <View style={styles.mainContainer}>
+      <BlueHeader title={productDetails?.product?.name || "Detalhes"} />
       <UnavailableStoreModal
         title="Loja indisponível"
         description="No momento, esta loja se encontra indisponível."
         isVisible={showUnavailableStoreModal}
         setIsVisible={setShowUnavailableStoreModal}
       />
-      <ScrollView>
-        <View style={themeController(styles.headerContainer)}>
-          <TouchableOpacity
-            style={themeController(styles.headerButtonShadow)}
-            onPress={() => goBack()}
-          >
-            <Feather
-              name="chevron-left"
-              size={26}
-              color={dynamicTheme.colors.primary}
-            />
-          </TouchableOpacity>
-        </View>
+      <ScrollView style={styles.contentContainer}>
         <View>
           {productDetails?.product?.images?.length > 0 ? (
             <Carousel

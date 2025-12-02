@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { globalStyles } from '../../../styles/globalStyles';
-import { Button, Header } from '../../../components/Shared';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { BlueHeader } from '../../../components/BlueHeader';
 import { theme } from '../../../styles/theme';
 import { styles } from './styles';
 import { Feather } from '@expo/vector-icons';
@@ -11,8 +10,6 @@ import { useGlobal } from '../../../hooks/GlobalContext';
 
 
 const Support: React.FC = () => {
-
-
   const { deleteUser, user } = useAuth();
   const { openAlert } = useGlobal();
 
@@ -28,10 +25,9 @@ const Support: React.FC = () => {
   }
 
   return (
-    <View style={globalStyles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <Header backButton />
-        <Text style={globalStyles.title}>Suporte</Text>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Suporte" />
+      <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <TouchableOpacity onPress={() => navigate('About')} style={styles.button}>
           <Feather name="info" size={24} color={theme.colors.black} />
           <Text style={styles.textAbout}>Sobre</Text>

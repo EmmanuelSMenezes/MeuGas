@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import pixLogo from "./../../assets/img/pix-logo.png";
 import { styles } from "./styles";
 import * as Clipboard from "expo-clipboard";
@@ -11,8 +11,7 @@ import {
   ParamListBase,
 } from "@react-navigation/native";
 import { useThemeContext } from "../../hooks/themeContext";
-import { globalStyles } from "../../styles/globalStyles";
-import Header from "../../components/Header";
+import { BlueHeader } from "../../components/BlueHeader";
 import CopyText from "../../components/CopyText";
 import Button from "../../components/Button";
 import { IPixResponse, Order } from "../../interfaces/Order";
@@ -155,15 +154,11 @@ const PixPayment: React.FC = () => {
   }, []);
 
   return (
-    <View
-      style={[
-        themeController(globalStyles.container),
-        themeController(styles.container),
-      ]}
-    >
-      <View style={themeController(styles.content)}>
-        <Header backButton />
-        <Image style={styles.pixLogo} source={pixLogo} />
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Pagamento PIX" />
+      <ScrollView style={styles.contentContainer}>
+        <View style={themeController(styles.content)}>
+          <Image style={styles.pixLogo} source={pixLogo} />
         <Text style={themeController(styles.title)}>
           Pedido aguardando pagamento
         </Text>
@@ -177,21 +172,22 @@ const PixPayment: React.FC = () => {
           textToCopy={pix.qr_codes[0].text}
         />
 
-        <QRCode size={200} value={pix.qr_codes[0].text} />
-      </View>
+          <QRCode size={200} value={pix.qr_codes[0].text} />
+        </View>
 
-      <View style={themeController(styles.footer)}>
-        <Button
-          title={isCopied ? "Copiado!" : "Copiar código"}
-          onPress={() => onCopyText()}
-        />
-        <Button
-          buttonTextStyle={themeController(styles.buttonText)}
-          buttonStyle={themeController(styles.buttonContainer)}
-          title="Voltar"
-          onPress={() => goBack()}
-        />
-      </View>
+        <View style={themeController(styles.footer)}>
+          <Button
+            title={isCopied ? "Copiado!" : "Copiar código"}
+            onPress={() => onCopyText()}
+          />
+          <Button
+            buttonTextStyle={themeController(styles.buttonText)}
+            buttonStyle={themeController(styles.buttonContainer)}
+            title="Voltar"
+            onPress={() => goBack()}
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 };

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { globalStyles } from "../../styles/globalStyles";
 import { styles } from "./styles";
 import PersonalDataForm from "./components/PersonalDataForm";
 import AddressDataForm from "./components/AddressDataForm";
 import { FormProvider, useForm } from "react-hook-form";
-import { Steps, Header } from "../../components/Shared";
+import { Steps } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { useThemeContext } from "../../hooks/themeContext";
 
 const SignUp: React.FC = () => {
@@ -31,15 +31,14 @@ const SignUp: React.FC = () => {
     },
   ];
 
-  const { dynamicTheme, themeController } = useThemeContext();
+  const { themeController } = useThemeContext();
 
   const TabContent = TabOptions[currentTab].component;
 
   return (
-    <View style={themeController(globalStyles.container)}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Header backButton />
-        <Text style={themeController(styles.title)}>Criar conta</Text>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Criar conta" />
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
         <Steps ordered currentTab={currentTab} tabs={TabOptions} />
         <FormProvider {...methods}>
           <TabContent />

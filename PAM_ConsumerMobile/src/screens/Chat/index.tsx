@@ -7,13 +7,13 @@ import {
 } from "react-native";
 import { RootStackParams } from "../../interfaces/RouteTypes";
 import { globalStyles } from "../../styles/globalStyles";
-import { Header, Modal, Select } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import ChatHeader from "./components/ChatHeader";
 import { styles } from "./styles";
 import { Feather } from "@expo/vector-icons";
 import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import { theme } from "../../styles/theme";
-import { goBack, navigate } from "../../routes/rootNavigation";
+import { navigate } from "../../routes/rootNavigation";
 import { useCommunication } from "../../hooks/CommunicationContext";
 import { useChatContext } from "../../hooks/ChatContext";
 import { useAuth } from "../../hooks/AuthContext";
@@ -305,22 +305,20 @@ const Chat: React.FC<RootStackParams<"Chat">> = ({ route }) => {
     );
   };
 
+  const chatHeaderComponent = (
+    <ChatHeader
+      setModalVisible={setShowModal}
+      modalVisible={showModal}
+      route={store}
+      onPress={() => navigate("StoreDetails", { branch_id: partner.branch_id })}
+      activeChatId={statusMember || "offline"}
+    />
+  );
+
   if (loading) return <Loading />;
   return (
-    <View style={{ flex: 1 }}>
-      <Header
-        style={styles.header}
-        backButton
-        children={
-          <ChatHeader
-            setModalVisible={setShowModal}
-            modalVisible={showModal}
-            route={store}
-            onPress={() => navigate("StoreDetails", { branch_id: partner.branch_id })}
-            activeChatId={statusMember || "offline"}
-          />
-        }
-      />
+    <View style={styles.mainContainer}>
+      <BlueHeader title={description || "Chat"} centerComponent={chatHeaderComponent} />
       <View style={[globalStyles.container, { paddingTop: 20 }]}>
         {showModal && (
           <TouchableOpacity

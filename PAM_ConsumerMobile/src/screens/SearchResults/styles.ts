@@ -2,6 +2,16 @@ import { theme } from "./../../styles/theme";
 import { Dimensions, StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+
   searchInputContainer: {
     flexDirection: "row",
     flex: 1,

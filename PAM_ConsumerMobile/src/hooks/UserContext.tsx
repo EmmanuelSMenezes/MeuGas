@@ -58,23 +58,86 @@ const UserProvider = ({ children }: UserProviderProps) => {
 
   const [consumerCards, setConsumerCards] = useState<ICard[]>([]);
 
-  // Carregar consumer do AsyncStorage quando o app inicia
+  // Carregar consumer e location do AsyncStorage quando o app inicia
   useEffect(() => {
-    const loadConsumerFromStorage = async () => {
+    const loadFromStorage = async () => {
       try {
-        const storagedConsumer = await AsyncStorage.getItem("@PAM:consumer");
+        const [storagedConsumer, storagedLocation] = await Promise.all([
+          AsyncStorage.getItem("@PAM:consumer"),
+          AsyncStorage.getItem("@PAM:location"),
+        ]);
+
         if (storagedConsumer) {
           const consumerData = JSON.parse(storagedConsumer);
           console.log("📦 Consumer carregado do AsyncStorage:", consumerData);
           setConsumer(consumerData);
         }
+
+        if (storagedLocation) {
+          const locationData = JSON.parse(storagedLocation);
+          console.log("📍 Location carregado do AsyncStorage:", locationData.street);
+          setUserLocation(locationData);
+        }
       } catch (error) {
-        console.error("❌ Erro ao carregar consumer do AsyncStorage:", error);
+        console.error("❌ Erro ao carregar dados do AsyncStorage:", error);
       }
     };
 
-    loadConsumerFromStorage();
+    loadFromStorage();
   }, []);
+
+  // Carregar endereços quando consumer for carregado
+  useEffect(() => {
+    const loadAddressesAndSetDefault = async () => {
+      if (!consumer?.consumer_id) return;
+
+      console.log("📍 UserContext - Carregando endereços do consumer:", consumer.consumer_id);
+      try {
+        const response = await api.get(
+          `${REACT_APP_URL_MS_CONSUMER}/address/all?consumer_id=${consumer.consumer_id}`
+        );
+        const { data } = response?.data;
+
+        if (data && data.length > 0) {
+          console.log("✅ UserContext - Endereços carregados:", data.length);
+          setAddresses(data);
+
+          // Verificar se já tem um location salvo no storage
+          const storagedLocation = await AsyncStorage.getItem("@PAM:location");
+
+          if (!storagedLocation) {
+            // Não tem location salvo, setar o default_address ou primeiro endereço
+            const defaultAddr = data.find(
+              (addr: Address) => addr.address_id === consumer.default_address
+            );
+
+            if (defaultAddr) {
+              console.log("🏠 UserContext - Setando endereço padrão automaticamente:", defaultAddr.street);
+              setUserLocation(defaultAddr);
+              await AsyncStorage.setItem("@PAM:location", JSON.stringify(defaultAddr));
+            } else {
+              // Se não tem default_address, usar o primeiro
+              console.log("🏠 UserContext - Usando primeiro endereço como padrão:", data[0].street);
+              setUserLocation(data[0]);
+              await AsyncStorage.setItem("@PAM:location", JSON.stringify(data[0]));
+            }
+          } else {
+            // Já tem location salvo, usar ele
+            const locationData = JSON.parse(storagedLocation);
+            console.log("📍 UserContext - Usando location do storage:", locationData.street);
+            setUserLocation(locationData);
+          }
+        } else {
+          console.log("📍 UserContext - Nenhum endereço encontrado para o consumer");
+          setAddresses([]);
+        }
+      } catch (error) {
+        console.error("❌ UserContext - Erro ao carregar endereços:", error);
+      }
+    };
+
+    loadAddressesAndSetDefault();
+  }, [consumer?.consumer_id]);
 
   const defaultAddress = userLocation
     ? userLocation

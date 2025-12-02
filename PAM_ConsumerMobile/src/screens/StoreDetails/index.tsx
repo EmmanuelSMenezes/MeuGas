@@ -4,15 +4,14 @@ import {
   Text,
   View,
   TouchableOpacity,
-  ScrollView,
   ActivityIndicator,
   FlatList,
 } from "react-native";
 import { styles } from "./styles";
-import { Card, Header } from "../../components/Shared";
+import { Card } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { Ionicons, Octicons } from "@expo/vector-icons";
 import { theme } from "../../styles/theme";
-import { RootStackParams } from "../../interfaces/RouteTypes";
 import { globalStyles } from "../../styles/globalStyles";
 import Tabs from "./components/Tabs";
 import {
@@ -22,12 +21,9 @@ import {
   useRoute,
 } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
-import { useCatalog } from "../../hooks/CatalogContext";
-import { IProduct } from "../../interfaces/Catalog";
 import { usePartner } from "../../hooks/PartnerContext";
 import { IStoreDetails } from "../../interfaces/Store";
 import Loading from "../../components/Loading";
-import { useOffer } from "../../hooks/OfferContext";
 import { useThemeContext } from "../../hooks/themeContext";
 
 interface RouteParams extends RouteProp<ParamListBase> {
@@ -83,8 +79,8 @@ const StoreDetails: React.FC = () => {
 
   if (!storeDetails) return <Loading />;
   return (
-    <View style={themeController(globalStyles.container)}>
-      <Header backButton />
+    <View style={styles.mainContainer}>
+      <BlueHeader title={storeDetails?.branch_name || "Loja"} />
       {showFloatButton && (
         <TouchableOpacity
           style={themeController(styles.floatButton)}

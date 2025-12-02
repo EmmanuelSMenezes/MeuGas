@@ -1,22 +1,16 @@
 import React, {
-  ReactNode,
-  SetStateAction,
   useEffect,
   useMemo,
   useState,
 } from "react";
 import { Text, View, FlatList } from "react-native";
 import { styles } from "./styles";
-import Header from "../../components/Header";
+import { BlueHeader } from "../../components/BlueHeader";
 import { InputSearch } from "../../components/Shared";
-import StoreSuggestion from "./components/StoreSuggestion";
 import CategorySuggestion from "./components/CategorySuggestion";
-import ItemSuggestion from "./components/ItemSuggestion";
-import SearchNotFound from "./components/SearchNotFound";
 import { useNavigation } from "@react-navigation/native";
 import { useCatalog } from "../../hooks/CatalogContext";
-import { Categories, Category } from "../../interfaces/Category";
-import { usePartner } from "../../hooks/PartnerContext";
+import { Category } from "../../interfaces/Category";
 import { Partner } from "../../interfaces/Partner";
 import { useOffer } from "../../hooks/OfferContext";
 import { useSearchFilter } from "../../hooks/SearchFilterContext";
@@ -82,26 +76,25 @@ const Search: React.FC = () => {
   //     )
   //   : productsCategory;
 
-  const handleSearchSuggestion = async (search: string) =>
-    navigate("SearchResults", { dataResearched: search });
+  const searchInputComponent = (
+    <View style={themeController(styles.searchInputContainer)}>
+      <InputSearch
+        placeholder="Pesquisar itens"
+        value={searchText}
+        onChangeText={(text) => setSearchText(text)}
+        onPress={() => navigate("SearchResults")}
+        onSubmitEditing={() =>
+          navigate("SearchResults")
+        }
+      />
+    </View>
+  );
 
   return (
-    <View style={themeController(styles.container)}>
-      <Header backButton>
-        <View style={themeController(styles.searchInputContainer)}>
-          <InputSearch
-            placeholder="Pesquisar itens"
-            value={searchText}
-            onChangeText={(text) => setSearchText(text)}
-            onPress={() => navigate("SearchResults")}
-            onSubmitEditing={() =>
-              navigate("SearchResults")
-            }
-          />
-        </View>
-      </Header>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Pesquisar" centerComponent={searchInputComponent} />
 
-      <View>
+      <View style={styles.contentContainer}>
         {!searchText && categoryMemo && (
           <>
           <Text style={themeController(styles.title)}>Categorias</Text>

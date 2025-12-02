@@ -1,4 +1,4 @@
-import React, { SetStateAction, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   View,
@@ -7,17 +7,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { globalStyles } from "../../styles/globalStyles";
-import { Card, Header, InputSearch, StoreCard } from "../../components/Shared";
+import { Card, InputSearch, StoreCard } from "../../components/Shared";
+import { BlueHeader } from "../../components/BlueHeader";
 import { styles } from "./styles";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { RootStackParams } from "../../interfaces/RouteTypes";
 import { MaterialIcons, Entypo, AntDesign } from "@expo/vector-icons";
 import ModalFilter from "../../components/ModalFilter";
-import { theme } from "../../styles/theme";
-import { useOffer } from "../../hooks/OfferContext";
 import { useProducts } from "../../hooks/ProductContext";
 import {
-  IBranch,
   IBranches,
   IOfferSearchedProducts,
 } from "../../interfaces/Offer";
@@ -177,8 +174,45 @@ const SearchResults: React.FC = () => {
     };
   }, []);
 
+  const searchHeaderComponent = brandName ? null : (
+    <View style={themeController(styles.searchInputContainer)}>
+      <InputSearch
+        placeholder="Pesquisar itens"
+        autoFocus={false}
+        value={searchText}
+        onPress={() => handleFindSearchResults()}
+        onSubmitEditing={() => handleFindSearchResults()}
+        onChangeText={(text) => setSearchText(text)}
+      />
+      <TouchableOpacity
+        onPress={() => setShowStoresOrderModal(true)}
+        style={themeController(styles.filterButton)}
+      >
+        <MaterialIcons
+          name="sort"
+          size={24}
+          color={dynamicTheme.colors.primary}
+        />
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={themeController(styles.filterButton)}
+        onPress={() => setShowFilterModal((visible) => !visible)}
+      >
+        <AntDesign
+          name="filter"
+          size={22}
+          color={dynamicTheme.colors.primary}
+        />
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
-    <View style={themeController(globalStyles.container)}>
+    <View style={styles.mainContainer}>
+      <BlueHeader
+        title={brandName || "Resultados"}
+        centerComponent={searchHeaderComponent}
+      />
       <ModalFilter
         setModalVisible={setShowFilterModal}
         modalVisible={showFilterModal}
@@ -191,42 +225,7 @@ const SearchResults: React.FC = () => {
         onOrderStores={getStores}
       />
 
-      <Header backButton onPressBackButton={() => goBack()}>
-        {brandName ? (
-          <Text style={themeController(globalStyles.title)}>{brandName}</Text>
-        ) : (
-          <View style={themeController(styles.searchInputContainer)}>
-            <InputSearch
-              placeholder="Pesquisar itens"
-              autoFocus={false}
-              value={searchText}
-              onPress={() => handleFindSearchResults()}
-              onSubmitEditing={() => handleFindSearchResults()}
-              onChangeText={(text) => setSearchText(text)}
-            />
-            <TouchableOpacity
-              onPress={() => setShowStoresOrderModal(true)}
-              style={themeController(styles.filterButton)}
-            >
-              <MaterialIcons
-                name="sort"
-                size={24}
-                color={dynamicTheme.colors.primary}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={themeController(styles.filterButton)}
-              onPress={() => setShowFilterModal((visible) => !visible)}
-            >
-              <AntDesign
-                name="filter"
-                size={22}
-                color={dynamicTheme.colors.primary}
-              />
-            </TouchableOpacity>
-          </View>
-        )}
-      </Header>
+      <View style={styles.contentContainer}>
 
       <FlatList
         showsVerticalScrollIndicator={false}
@@ -367,6 +366,7 @@ const SearchResults: React.FC = () => {
           );
         }}
       />
+      </View>
     </View>
   );
 };

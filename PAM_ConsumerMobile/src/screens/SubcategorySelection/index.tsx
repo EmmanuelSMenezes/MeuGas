@@ -4,8 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { styles } from './styles';
 import { useThemeContext } from '../../hooks/themeContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../../components/Header';
+import { BlueHeader } from '../../components/BlueHeader';
 import { useProducts } from '../../hooks/ProductContext';
 
 const SubcategorySelection: React.FC = () => {
@@ -41,20 +40,11 @@ const SubcategorySelection: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={themeController(styles.container)} edges={['top']}>
-      <View style={[
-        themeController(styles.headerContainer),
-        { backgroundColor: categoryColor }
-      ]}>
-        <Header backButton onPressBackButton={goBack}>
-          <Text style={themeController(styles.headerTitle)}>
-            {parentCategoryName}
-          </Text>
-        </Header>
-      </View>
+    <View style={styles.mainContainer}>
+      <BlueHeader title={parentCategoryName} />
 
-      <ScrollView 
-        style={themeController(styles.content)}
+      <ScrollView
+        style={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
         <Text style={themeController(styles.subtitle)}>
@@ -113,7 +103,7 @@ const SubcategorySelection: React.FC = () => {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { styles } from './styles';
 import { useThemeContext } from '../../hooks/themeContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { BlueHeader } from '../../components/BlueHeader';
 import { useLocation } from '../../hooks/LocationContext';
 import { useProducts } from '../../hooks/ProductContext';
 import Logo from './../../assets/img/logo.png';
@@ -64,18 +64,20 @@ const CategorySelection: React.FC = () => {
     }
   };
 
+  const logoComponent = (
+    <Image
+      source={Logo}
+      style={styles.logo}
+      resizeMode="contain"
+    />
+  );
+
   return (
-    <SafeAreaView style={themeController(styles.container)} edges={['top']}>
-      <View style={themeController(styles.headerContainer)}>
-        <Image
-          source={Logo}
-          style={themeController(styles.logo)}
-          resizeMode="contain"
-        />
-      </View>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Categorias" centerComponent={logoComponent} />
 
       <ScrollView
-        style={themeController(styles.content)}
+        style={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
         <Text style={themeController(styles.subtitle)}>
@@ -143,7 +145,7 @@ const CategorySelection: React.FC = () => {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

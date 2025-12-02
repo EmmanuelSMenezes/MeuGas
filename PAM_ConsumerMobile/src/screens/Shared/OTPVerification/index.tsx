@@ -1,7 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import {
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+  StatusBar,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { Button, OTPInput } from "../../../components/Shared";
-import { globalStyles } from "../../../styles/globalStyles";
 import { styles } from "./styles";
 import { MaskedText } from "react-native-mask-text";
 import { REACT_APP_URL_MS_AUTH, REACT_APP_URL_MS_CONSUMER } from "@env";
@@ -14,6 +22,8 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useThemeContext } from "../../../hooks/themeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialIcons } from "@expo/vector-icons";
+import Logo from "../../../assets/img/logo.png";
 
 const OTPVerification: React.FC<RootStackParams<"OTPVerification">> = ({
   route,
@@ -21,7 +31,7 @@ const OTPVerification: React.FC<RootStackParams<"OTPVerification">> = ({
   const { OTPSend, setUser } = useAuth();
   const { setConsumer } = useUser();
   const { openAlert } = useGlobal();
-  const { navigate, replace } = useNavigation<NativeStackNavigationProp<any>>();
+  const { navigate, replace, goBack } = useNavigation<NativeStackNavigationProp<any>>();
   const { dynamicTheme, themeController } = useThemeContext();
 
   const timerSeconds = 60;
@@ -193,61 +203,93 @@ const OTPVerification: React.FC<RootStackParams<"OTPVerification">> = ({
     }
   }, [resendCodeTimer]);
 
+  // Mascarar telefone para exibição (ex: (61) 9 9***-**87)
+  const maskedPhone = route.params?.phone
+    ? `(${route.params.phone.slice(0, 2)}) 9 ${route.params.phone.slice(3, 4)}***-**${route.params.phone.slice(-2)}`
+    : "";
+
   return (
-    <>
-      <View style={[themeController(globalStyles.container), styles.container]}>
-        <View>
-          <Text style={[themeController(styles.title)]}>Verificar celular</Text>
-          <Text style={themeController(styles.subtitle)}>
-            Um código de verificação foi enviado para o telefone{"\n"}
-            <MaskedText
-              style={themeController(globalStyles.textHighlight)}
-              mask="(99) 99999-9999"
-              children={` ${route.params?.phone}`}
-            />
-          </Text>
-        </View>
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563EB" />
 
-        <OTPInput
-          autoFocus
-          pinLength={6}
-          onChangeCode={(code) => setCodeOTP(code)}
-        />
+      {/* Header Azul com Logo */}
+      <View style={styles.blueHeader}>
+        <TouchableOpacity style={styles.backButton} onPress={() => goBack()}>
+          <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
+          <Text style={styles.backButtonText}>Voltar</Text>
+        </TouchableOpacity>
 
-        <View style={themeController(styles.resendCodeContainer)}>
-          {resendCodeTimer >= 0 ? (
-            <Text style={themeController(styles.resendCodeTimer)}>
-              Aguarde {resendCodeTimer} segundos para solicitar um novo código.
-            </Text>
-          ) : (
-            <Text style={themeController(styles.resendCodeTitle)}>
-              Não recebeu um código?
-            </Text>
-          )}
-
-          <TouchableOpacity
-            disabled={resendCodeTimer >= 0}
-            onPress={() => handleResendCode()}
-          >
-            <Text
-              style={[
-                themeController(styles.resendCodeButtonText),
-                resendCodeTimer >= 0 && themeController(styles.disabledButton),
-              ]}
-            >
-              Reenviar código
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <Button
-          title="Verificar e continuar"
-          loading={isLoading}
-          buttonStyle={themeController(styles.confirmButton)}
-          onPress={() => onSubmit()}
+        <Image
+          source={Logo}
+          style={styles.logo}
+          resizeMode="contain"
         />
       </View>
-    </>
+
+      {/* Conteúdo Branco */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.formContainer}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.formTitle}>Código de validação SMS</Text>
+          <Text style={styles.formSubtitle}>
+            Informe abaixo o código que foi enviado por SMS para o número cadastrado.
+          </Text>
+
+          <Text style={styles.phoneNumber}>{maskedPhone}</Text>
+
+          <View style={styles.otpContainer}>
+            <OTPInput
+              autoFocus
+              pinLength={6}
+              onChangeCode={(code) => setCodeOTP(code)}
+            />
+          </View>
+
+          <View style={styles.resendCodeContainer}>
+            <Text style={styles.resendCodeTitle}>
+              Ainda não recebeu o código?
+            </Text>
+
+            <TouchableOpacity
+              disabled={resendCodeTimer >= 0}
+              onPress={() => handleResendCode()}
+            >
+              <Text
+                style={[
+                  styles.resendCodeButtonText,
+                  resendCodeTimer >= 0 && styles.disabledButton,
+                ]}
+              >
+                {resendCodeTimer >= 0
+                  ? `Enviar código novamente (${resendCodeTimer}s)`
+                  : "Enviar código novamente"
+                }
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Button
+            title="Avançar"
+            loading={isLoading}
+            buttonStyle={styles.submitButton}
+            icon={
+              <MaterialIcons
+                name="arrow-forward"
+                size={24}
+                color="#FFFFFF"
+              />
+            }
+            onPress={() => onSubmit()}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 

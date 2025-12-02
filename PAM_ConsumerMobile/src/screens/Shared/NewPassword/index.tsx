@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import { globalStyles } from "../../../styles/globalStyles";
 import { styles } from "./styles";
 import { Controller, useForm } from "react-hook-form";
@@ -8,7 +8,8 @@ import PasswordStrengthBar from "../../../components/PasswordStrengthBar";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { Button, Header } from "../../../components/Shared";
+import { Button } from "../../../components/Shared";
+import { BlueHeader } from "../../../components/BlueHeader";
 import { useAuth } from "../../../hooks/AuthContext";
 import { useGlobal } from "../../../hooks/GlobalContext";
 import { useNavigation } from "@react-navigation/native";
@@ -65,10 +66,10 @@ const NewPassword: React.FC = () => {
   };
 
   return (
-    <View style={themeController(globalStyles.container)}>
-      <Header backButton />
-      <Text style={themeController(globalStyles.title)}>Nova senha</Text>
-      <View style={themeController(styles.container)}>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Nova senha" />
+      <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
+        <View style={themeController(styles.container)}>
         <Controller
           name="password"
           control={control}
@@ -119,7 +120,8 @@ const NewPassword: React.FC = () => {
           buttonStyle={themeController(styles.registerButton)}
           onPress={handleSubmit(onSubmit)}
         />
-      </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };

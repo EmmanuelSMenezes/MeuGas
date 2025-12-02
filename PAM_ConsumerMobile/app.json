@@ -30,7 +30,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FF6A00"
+        "backgroundColor": "#FFFFFF"
       },
       "package": "com.meugas.app",
       "permissions": [

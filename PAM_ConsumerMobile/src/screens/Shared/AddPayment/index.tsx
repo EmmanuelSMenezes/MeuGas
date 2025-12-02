@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text } from "react-native";
 import { globalStyles } from "../../../styles/globalStyles";
-import { Button, Header, Input, MaskedInput } from "../../../components/Shared";
+import { Button, Input, MaskedInput } from "../../../components/Shared";
+import { BlueHeader } from "../../../components/BlueHeader";
 import { Controller, useForm } from "react-hook-form";
 import { styles } from "./styles";
 import * as yup from "yup";
@@ -15,8 +16,6 @@ import { RootStackParams } from "../../../interfaces/RouteTypes";
 import CreditCard from "../../../components/CreditCard";
 import { mask } from "react-native-mask-text";
 import { useThemeContext } from "../../../hooks/themeContext";
-import { REACT_APP_PAGSEGURO_PUBLIC_KEY } from "@env";
-import { PagSeguro } from "../../../utils/pagSeguroScript";
 
 const AddPayment: React.FC<RootStackParams<"AddPayment">> = ({ route }) => {
   const { createCard, updateCard } = useUser();
@@ -102,10 +101,12 @@ const AddPayment: React.FC<RootStackParams<"AddPayment">> = ({ route }) => {
   };
   const [documentMaskType, setDocumentMaskType] = useState<DocumentMask>("cpf");
 
+  const headerTitle = params?.cardToEdit ? "Editar cartão" : "Novo cartão";
+
   return (
-    <View style={themeController(globalStyles.container)}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Header backButton />
+    <View style={styles.mainContainer}>
+      <BlueHeader title={headerTitle} />
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.contentContainer}>
         <View style={themeController(styles.paymentsContainer)}>
           <Text style={themeController(globalStyles.subtitle)}>
             {route?.params?.type}

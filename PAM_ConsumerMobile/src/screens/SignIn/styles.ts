@@ -2,11 +2,30 @@ import { theme } from './../../styles/theme';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+
+  formContainer: {
+    paddingTop: theme.spacing.xl,
+  },
+
   container: {
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
     paddingHorizontal: theme.spacing.lg,
+  },
+
+  headerLogo: {
+    width: 120,
+    height: 50,
   },
 
   logo: {

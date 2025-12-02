@@ -4,6 +4,62 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+
+  blueHeader: {
+    backgroundColor: '#2563EB',
+    paddingTop: 50,
+    paddingBottom: 20,
+    paddingHorizontal: 16,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+  },
+
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#22C55E',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: theme.fonts.bold,
+  },
+
+  addressText: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontFamily: theme.fonts.medium,
+  },
+
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontFamily: theme.fonts.semiBold,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+
+  contentContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,

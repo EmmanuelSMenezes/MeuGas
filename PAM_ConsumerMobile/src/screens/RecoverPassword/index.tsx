@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { styles } from './styles';
 import { globalStyles } from '../../styles/globalStyles';
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup';
-import { Button, Header, MaskedInput } from '../../components/Shared';
+import { Button, MaskedInput } from '../../components/Shared';
+import { BlueHeader } from '../../components/BlueHeader';
 import { useAuth } from '../../hooks/AuthContext';
 
 
@@ -37,10 +38,10 @@ const RecoverPassword: React.FC = () => {
   }
 
   return (
-    <ScrollView style={globalStyles.container}>
-      <Header backButton />
-      <View style={styles.container}>
-        <Text style={globalStyles.title}>Recuperação de Senha</Text>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Recuperação de Senha" />
+      <ScrollView style={styles.contentContainer}>
+        <View style={styles.container}>
         <Controller
           name='phone'
           control={control}
@@ -60,14 +61,14 @@ const RecoverPassword: React.FC = () => {
           )}
         />
 
-        <Button
-          title='Enviar'
-          buttonStyle={styles.registerButton}
-          onPress={handleSubmit(onSubmit)}
-        />
-      </View>
-
-    </ScrollView>
+          <Button
+            title='Enviar'
+            buttonStyle={styles.registerButton}
+            onPress={handleSubmit(onSubmit)}
+          />
+        </View>
+      </ScrollView>
+    </View>
   )
 }
 

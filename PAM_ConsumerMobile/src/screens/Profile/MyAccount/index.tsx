@@ -3,13 +3,12 @@ import {
   View,
   Text,
   ScrollView,
-  Touchable,
   TouchableOpacity,
   BackHandler,
   ActivityIndicator,
 } from "react-native";
-import { globalStyles } from "../../../styles/globalStyles";
-import { Avatar, Header, Input, MaskedInput } from "../../../components/Shared";
+import { Avatar, Input, MaskedInput } from "../../../components/Shared";
+import { BlueHeader } from "../../../components/BlueHeader";
 import { Controller, useForm } from "react-hook-form";
 import { styles } from "./styles";
 
@@ -156,48 +155,28 @@ const MyAccount: React.FC = () => {
       />
     );
 
+  const editButton = editable ? (
+    <TouchableOpacity onPress={handleSubmit(handleUpdateUser)}>
+      {!loading ? (
+        <MaterialIcons name={"done"} size={24} color="#FFFFFF" />
+      ) : (
+        <ActivityIndicator size={18} color="#FFFFFF" />
+      )}
+    </TouchableOpacity>
+  ) : (
+    <TouchableOpacity onPress={() => setEditable(!editable)}>
+      <Feather name="edit" size={24} color="#FFFFFF" />
+    </TouchableOpacity>
+  );
+
   return (
-    <View style={themeController(globalStyles.container)}>
+    <View style={styles.mainContainer}>
+      <BlueHeader title="Meus dados" rightComponent={editButton} />
       <ScrollView
+        style={styles.contentContainer}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <Header backButton />
-        <View style={{ flexDirection: "row" }}>
-          <Text style={[themeController(globalStyles.title)]}>Sua conta</Text>
-          <View
-            style={{
-              justifyContent: "flex-start",
-              alignItems: "flex-end",
-              flex: 1,
-            }}
-          >
-            {editable ? (
-              <TouchableOpacity onPress={handleSubmit(handleUpdateUser)}>
-                {!loading ? (
-                  <MaterialIcons
-                    name={"done"}
-                    size={24}
-                    color={dynamicTheme.colors.primary}
-                  />
-                ) : (
-                  <ActivityIndicator
-                    size={18}
-                    color={dynamicTheme.colors.primary}
-                  />
-                )}
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={() => setEditable(!editable)}>
-                <Feather
-                  name="edit"
-                  size={24}
-                  color={dynamicTheme.colors.primary}
-                />
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
         <Controller
           name="avatar"
           defaultValue={user?.profile?.avatar}

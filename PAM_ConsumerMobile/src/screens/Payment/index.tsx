@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
-import Header from "../../components/Header";
+import { BlueHeader } from "../../components/BlueHeader";
 import { globalStyles } from "../../styles/globalStyles";
 import {
   Menu,
@@ -77,17 +77,17 @@ const PaymentCard: React.FC = () => {
 
   return (
     <MenuProvider>
-      <View style={globalStyles.container}>
+      <View style={styles.mainContainer}>
+        <BlueHeader title="Seus cartões" />
         <ModalCardPay
           setModalVisible={setModalVisible}
           modalVisible={modalVisible}
         />
         <ScrollView
+          style={styles.contentContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Header backButton />
-          <Text style={globalStyles.title}>Seus cartões</Text>
           <View style={styles.container}>
             {consumerCards.length > 0 ? (
               consumerCards?.map((item) => {

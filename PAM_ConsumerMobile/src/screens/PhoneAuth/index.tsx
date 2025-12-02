@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import Button from "../../components/Button";
 import { Input, MaskedInput } from "../../components/Shared";
 import { globalStyles } from "../../styles/globalStyles";
@@ -10,9 +18,7 @@ import { styles } from "./styles";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../../hooks/AuthContext";
 import { useThemeContext } from "../../hooks/themeContext";
-import { Image } from 'react-native';
 import Logo from "./../../assets/img/logo.png";
 import { useGlobal } from "../../hooks/GlobalContext";
 import { REACT_APP_URL_MS_AUTH } from "@env";
@@ -24,7 +30,7 @@ interface PhoneAuthProps {
 }
 
 const PhoneAuth: React.FC = () => {
-  const { navigate } = useNavigation();
+  const { navigate, goBack } = useNavigation();
   const { dynamicTheme, themeController } = useThemeContext();
   const { openAlert } = useGlobal();
   const [isLoading, setIsLoading] = useState(false);
@@ -44,37 +50,38 @@ const PhoneAuth: React.FC = () => {
   });
 
   const onSubmit = async (data: PhoneAuthProps) => {
+    console.log("📱 PhoneAuth - Iniciando envio OTP");
+    console.log("📱 PhoneAuth - Nome:", data.name);
+    console.log("📱 PhoneAuth - Telefone:", data.phone);
+
     setIsLoading(true);
     try {
-      // Chamar API para enviar OTP
+      const payload = {
+        phone: data.phone,
+        name: data.name,
+      };
+      console.log("📱 PhoneAuth - Payload:", JSON.stringify(payload));
+      console.log("📱 PhoneAuth - URL:", `${REACT_APP_URL_MS_AUTH}/otp/send-login`);
+
       const response = await api.post(
         `${REACT_APP_URL_MS_AUTH}/otp/send-login`,
-        {
-          phone: data.phone,
-          name: data.name,
-        }
+        payload
       );
 
+      console.log("📱 PhoneAuth - Response:", JSON.stringify(response.data));
+
       if (response.data.success) {
-        openAlert({
-          title: "Código enviado",
-          description: "Um código foi enviado para o seu telefone",
-          type: "success",
-          buttons: {
-            confirmButtonTitle: "Ok",
-            cancelButton: false,
-            onConfirm: () => {
-              navigate("OTPVerification", {
-                phone: data.phone,
-                name: data.name
-              });
-            },
-          },
+        console.log("✅ PhoneAuth - OTP enviado com sucesso, navegando...");
+        navigate("OTPVerification", {
+          phone: data.phone,
+          name: data.name
         });
       } else {
         throw new Error(response.data.message || "Erro ao enviar código");
       }
     } catch (error: any) {
+      console.log("❌ PhoneAuth - Erro:", error?.message);
+      console.log("❌ PhoneAuth - Response:", error?.response?.data);
       openAlert({
         title: "Erro",
         description: error?.response?.data?.message || "Não foi possível enviar o código",
@@ -90,81 +97,94 @@ const PhoneAuth: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={themeController(globalStyles.container)} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={[themeController(styles.container)]}>
-          <Image
-            source={Logo}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text style={[themeController(styles.title)]}>Acesse sua conta</Text>
-          <Text style={[themeController(styles.subtitle)]}>
-            Digite seu nome e celular para receber um código de verificação SMS
-          </Text>
+    <View style={styles.mainContainer}>
+      <StatusBar barStyle="light-content" backgroundColor="#2563EB" />
 
-          <Controller
-            name="name"
-            control={control}
-            render={({ field: { onChange, onBlur, value, ref } }) => (
-              <Input
-                refInput={ref}
-                autoCapitalize="words"
-                onSubmitEditing={() => setFocus("phone")}
-                returnKeyType="next"
-                onBlur={onBlur}
-                inputStyle={themeController(styles.inputSpacing)}
-                error={!!errors?.name}
-                helperText={errors?.name?.message}
-                placeholder="Nome completo"
-                onChangeText={(text) => onChange(text)}
-                value={value}
-              />
-            )}
-          />
+      {/* Header Azul com Logo */}
+      <View style={styles.blueHeader}>
+        <TouchableOpacity style={styles.backButton} onPress={() => goBack()}>
+          <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
+          <Text style={styles.backButtonText}>Voltar</Text>
+        </TouchableOpacity>
 
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field: { onChange, value } }) => (
-              <MaskedInput
-                label=""
-                mask="(99) 99999-9999"
-                maxLength={15}
-                inputStyle={themeController(styles.inputSpacing)}
-                error={!!errors?.phone}
-                helperText={errors?.phone?.message}
-                placeholder="(xx) xxxxx-xxxx"
-                onChangeText={(_, text) => onChange(text)}
-                keyboardType="numeric"
-                value={value}
-              />
-            )}
-          />
+        <Image
+          source={Logo}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
+      {/* Formulário Branco */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.formContainer}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Nome</Text>
+            <Controller
+              name="name"
+              control={control}
+              render={({ field: { onChange, onBlur, value, ref } }) => (
+                <Input
+                  refInput={ref}
+                  autoCapitalize="words"
+                  onSubmitEditing={() => setFocus("phone")}
+                  returnKeyType="next"
+                  onBlur={onBlur}
+                  inputStyle={styles.input}
+                  error={!!errors?.name}
+                  helperText={errors?.name?.message}
+                  placeholder="Insira seu nome aqui"
+                  onChangeText={(text) => onChange(text)}
+                  value={value}
+                />
+              )}
+            />
+          </View>
+
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Celular</Text>
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <MaskedInput
+                  label=""
+                  mask="(99) 99999-9999"
+                  maxLength={15}
+                  inputStyle={styles.input}
+                  error={!!errors?.phone}
+                  helperText={errors?.phone?.message}
+                  placeholder="(00) 00000-0000"
+                  onChangeText={(_, text) => onChange(text)}
+                  keyboardType="numeric"
+                  value={value}
+                />
+              )}
+            />
+          </View>
 
           <Button
             title="Avançar"
             loading={isLoading}
-            buttonStyle={themeController(styles.signInButton)}
+            buttonStyle={styles.submitButton}
             icon={
               <MaterialIcons
                 name="arrow-forward"
                 size={24}
-                color={dynamicTheme.colors.white}
+                color="#FFFFFF"
               />
             }
             onPress={handleSubmit(onSubmit)}
           />
-
-          <Text style={themeController(styles.signUpButton)}>
-            Ao continuar, você concorda com nossos{" "}
-            <Text style={themeController(globalStyles.textHighlight)}>
-              Termos de Uso
-            </Text>
-          </Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
