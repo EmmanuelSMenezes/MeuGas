@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-multi-assign */
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import { Container, FormLabel, Stack } from '@mui/material';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
@@ -33,6 +33,45 @@ export default function KanbanPage() {
   const [currentOrder, setCurrentOrder] = useState<any>();
   const today = new Date().toLocaleDateString('pt-BR');
   const userId = user?.isCollaborator ? user?.sponsor_id : user?.user_id;
+
+  // Referência para o áudio de notificação de novo pedido
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Função para tocar o som de notificação 3 vezes
+  const playNotificationSound = useCallback(() => {
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio('/sounds/som_parceiro_pedido.wav');
+      }
+
+      let playCount = 0;
+      const maxPlays = 3;
+
+      const playSound = () => {
+        if (playCount < maxPlays && audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch((error) => {
+            console.warn('Não foi possível tocar o som de notificação:', error);
+          });
+          playCount += 1;
+        }
+      };
+
+      // Tocar a primeira vez
+      playSound();
+
+      // Configurar para tocar nas próximas vezes quando o áudio terminar
+      if (audioRef.current) {
+        audioRef.current.onended = () => {
+          if (playCount < maxPlays) {
+            playSound();
+          }
+        };
+      }
+    } catch (error) {
+      console.warn('Erro ao criar o áudio:', error);
+    }
+  }, []);
 
   const getOrdersList = async () => {
     setLoading(true);
@@ -249,8 +288,12 @@ export default function KanbanPage() {
   useEffect(() => {
     if (signalROrderConnection) {
       signalROrderConnection.on('RefreshOrderList', async (order) => {
-        console.info(`[WS - ON]: Status Received.`);
+        console.info(`[WS - ON]: Novo pedido recebido!`);
         console.info('signal', signalROrderConnection);
+
+        // Tocar som de notificação quando um novo pedido chegar
+        playNotificationSound();
+
         getOrdersList();
         console.log('order on', order);
         const newError = order?.Pagseguro?.ErrorPayment?.error_messages;
@@ -261,7 +304,7 @@ export default function KanbanPage() {
         }
       });
     }
-  }, [signalROrderConnection]);
+  }, [signalROrderConnection, playNotificationSound]);
 
   useEffect(() => {
     getOrdersList();
