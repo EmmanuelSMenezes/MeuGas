@@ -33,7 +33,7 @@ const Input = ({
   const { dynamicTheme, themeController } = useThemeContext();
 
   return (
-    <View style={[themeController(styles.inputContainer), inputStyle]}>
+    <View style={themeController(styles.inputContainer)}>
       {label && (
         <Text style={themeController(globalStyles.inputLabel)}>
           {label}{" "}
@@ -44,7 +44,7 @@ const Input = ({
       )}
       <TextInput
         ref={refInput}
-        style={[themeController(globalStyles.inputContent), textInputStyle]}
+        style={[themeController(globalStyles.inputContent), inputStyle, textInputStyle]}
         {...props}
       />
       {helperText && (

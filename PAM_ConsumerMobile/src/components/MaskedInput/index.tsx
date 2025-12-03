@@ -33,7 +33,7 @@ const MaskedInput = ({
   const { dynamicTheme, themeController } = useThemeContext();
 
   return (
-    <View style={inputStyle}>
+    <View style={styles.inputContainer}>
       {label && (
         <Text style={themeController(globalStyles.inputLabel)}>
           {label}{" "}
@@ -44,7 +44,7 @@ const MaskedInput = ({
       )}
       <MaskedTextInput
         ref={refInput}
-        style={[themeController(globalStyles.inputContent), textInputStyle]}
+        style={[themeController(globalStyles.inputContent), inputStyle, textInputStyle]}
         {...props}
       />
       {helperText && (

@@ -110,29 +110,7 @@ const TabNavigation = () => {
         options={{
           title: "",
           lazy: true,
-          headerShown: true,
-          headerTintColor: dynamicTheme.colors.danger,
-          headerStyle: themeController(globalStyles.tabHeaderStyle),
-          headerShadowVisible: false,
-          header: () => (
-            <View style={themeController(globalStyles.headerContainer)}>
-              <TouchableOpacity
-                style={themeController(globalStyles.headerSearchButton)}
-                onPress={() => {
-                  navigate("Search");
-                }}
-              >
-                <AntDesign
-                  name="search1"
-                  size={18}
-                  color={dynamicTheme.colors.gray}
-                />
-                <Text style={globalStyles.headerSearchButtonText}>
-                  Busque por qualquer coisa aqui
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ),
+          headerShown: false,
           tabBarLabel: "Início",
           tabBarIcon: ({ focused, color }) => (
             <TabBarIcon focused={focused} color={color} name="home" size={28} />

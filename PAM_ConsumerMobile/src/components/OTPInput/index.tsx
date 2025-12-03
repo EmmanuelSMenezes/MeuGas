@@ -43,19 +43,7 @@ const OTPInput = ({ pinLength, autoFocus = true, onChangeCode }: OTPInputProps) 
     onChangeCode(codeValues.join(''));
   }, [codeValues])
 
-  useEffect(() => {
-    try {
-      Clipboard.addClipboardListener(async ({ contentTypes }: Clipboard.ClipboardEvent) => {
-        if (contentTypes?.includes(Clipboard.ContentType.PLAIN_TEXT)) {
-          const text = await Clipboard.getStringAsync();
-          const pin = text.replace(/\D/g,'').split('', pinLength);
-          setCodeValues(pin)
-        }
-      });
-    } catch (err) {
-      // console.error(err);
-    }
-  }, [])
+  // Removido ClipboardListener - estava preenchendo OTP automaticamente sem controle do usuário
 
   return (
     <View style={themeController(styles.container)}>

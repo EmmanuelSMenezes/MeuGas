@@ -144,6 +144,11 @@ export function shouldShowError(error: any): boolean {
     return false;
   }
 
+  // Não mostrar erro 401 (sessão expirada) - o interceptor já redireciona para login
+  if (error?.response?.status === 401) {
+    return false;
+  }
+
   return true;
 }
 

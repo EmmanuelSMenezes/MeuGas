@@ -9,16 +9,15 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
+  TextInput,
 } from "react-native";
 import Button from "../../components/Button";
-import { Input, MaskedInput } from "../../components/Shared";
-import { globalStyles } from "../../styles/globalStyles";
+import { MaskedTextInput } from "react-native-mask-text";
 import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigation } from "@react-navigation/native";
-import { useThemeContext } from "../../hooks/themeContext";
 import Logo from "./../../assets/img/logo.png";
 import { useGlobal } from "../../hooks/GlobalContext";
 import { REACT_APP_URL_MS_AUTH } from "@env";
@@ -31,7 +30,6 @@ interface PhoneAuthProps {
 
 const PhoneAuth: React.FC = () => {
   const { navigate, goBack } = useNavigation();
-  const { dynamicTheme, themeController } = useThemeContext();
   const { openAlert } = useGlobal();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -130,19 +128,23 @@ const PhoneAuth: React.FC = () => {
               name="name"
               control={control}
               render={({ field: { onChange, onBlur, value, ref } }) => (
-                <Input
-                  refInput={ref}
-                  autoCapitalize="words"
-                  onSubmitEditing={() => setFocus("phone")}
-                  returnKeyType="next"
-                  onBlur={onBlur}
-                  inputStyle={styles.input}
-                  error={!!errors?.name}
-                  helperText={errors?.name?.message}
-                  placeholder="Insira seu nome aqui"
-                  onChangeText={(text) => onChange(text)}
-                  value={value}
-                />
+                <View>
+                  <TextInput
+                    ref={ref}
+                    autoCapitalize="words"
+                    onSubmitEditing={() => setFocus("phone")}
+                    returnKeyType="next"
+                    onBlur={onBlur}
+                    style={styles.input}
+                    placeholder="Insira seu nome aqui"
+                    placeholderTextColor="#999999"
+                    onChangeText={(text) => onChange(text)}
+                    value={value}
+                  />
+                  {errors?.name && (
+                    <Text style={styles.errorText}>{errors.name.message}</Text>
+                  )}
+                </View>
               )}
             />
           </View>
@@ -153,18 +155,20 @@ const PhoneAuth: React.FC = () => {
               name="phone"
               control={control}
               render={({ field: { onChange, value } }) => (
-                <MaskedInput
-                  label=""
-                  mask="(99) 99999-9999"
-                  maxLength={15}
-                  inputStyle={styles.input}
-                  error={!!errors?.phone}
-                  helperText={errors?.phone?.message}
-                  placeholder="(00) 00000-0000"
-                  onChangeText={(_, text) => onChange(text)}
-                  keyboardType="numeric"
-                  value={value}
-                />
+                <View>
+                  <MaskedTextInput
+                    mask="(99) 99999-9999"
+                    style={styles.input}
+                    placeholder="(00) 00000-0000"
+                    placeholderTextColor="#999999"
+                    onChangeText={(_, text) => onChange(text)}
+                    keyboardType="numeric"
+                    value={value}
+                  />
+                  {errors?.phone && (
+                    <Text style={styles.errorText}>{errors.phone.message}</Text>
+                  )}
+                </View>
               )}
             />
           </View>

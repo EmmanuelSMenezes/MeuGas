@@ -57,11 +57,10 @@ export const styles = StyleSheet.create({
     fontFamily: theme.fonts.medium,
     color: '#333333',
     marginBottom: 8,
-    marginTop: 8,
   },
 
   inputWrapper: {
-    marginBottom: 16,
+    marginBottom: 24,
   },
 
   input: {
@@ -69,7 +68,10 @@ export const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     borderRadius: 8,
     backgroundColor: '#FFFFFF',
+    height: 50,
+    paddingHorizontal: 16,
     marginBottom: 0,
+    flexDirection: 'column',
   },
 
   submitButton: {
@@ -78,6 +80,13 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 8,
     height: 50,
+  },
+
+  errorText: {
+    color: '#EF4444',
+    fontSize: 12,
+    fontFamily: theme.fonts.regular,
+    marginTop: 4,
   },
 });
 

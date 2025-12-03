@@ -185,7 +185,8 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
       } catch (error) {
         logError("OfferContext.getProductOffersByLocationPoint", error);
 
-        if (shouldShowError(error)) {
+        // Não mostrar alerta de erro 401 (já está sendo tratado pelo interceptor)
+        if (shouldShowError(error) && error?.response?.status !== 401) {
           const errorMsg = getErrorMessage(error);
           openAlert({
             title: errorMsg.title,
@@ -197,6 +198,9 @@ const OfferProvider = ({ children }: OfferProviderProps) => {
             },
           });
         }
+
+        // Retornar objeto vazio para evitar erros de "Cannot read property 'products' of undefined"
+        return { products: [], pagination: { currentPage: 1, totalPages: 0, totalRows: 0, itensPerPage: 0 } };
       }
     },
     [activeLocation]

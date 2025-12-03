@@ -100,6 +100,13 @@ export const ProductProvider = ({ children }: ProductProviderProps) => {
         false  // shipping
       );
 
+      // Proteção contra response undefined (em caso de erro de rede/API)
+      if (!response) {
+        console.log('⚠️ Response undefined - API pode estar indisponível');
+        setAllProducts([]);
+        return;
+      }
+
       setAllProducts(response.products || []);
       console.log(`✅ ${response.products?.length || 0} produtos carregados`);
 
