@@ -6,6 +6,7 @@ import { useUser } from "../../hooks/UserContext";
 import { useAuth } from "../../hooks/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { styles } from "./styles";
+import { globalStyles } from "../../styles/globalStyles";
 import { theme } from "../../styles/theme";
 import { useNavigation } from "@react-navigation/native";
 import {
