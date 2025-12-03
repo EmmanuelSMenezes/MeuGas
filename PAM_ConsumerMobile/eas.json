@@ -10,7 +10,24 @@
         "buildType": "apk"
       },
       "ios": {},
-      "channel": "development"
+      "channel": "development",
+      "env": {
+        "REACT_APP_URL_MS_AUTH": "https://api.meugas.app/authentication/",
+        "REACT_APP_URL_MS_COMM": "https://api.meugas.app/communication/",
+        "REACT_APP_URL_MS_CONSUMER": "https://api.meugas.app/consumer/",
+        "REACT_APP_URL_MS_PARTNER": "https://api.meugas.app/partner/",
+        "REACT_APP_URL_MS_CATALOG": "https://api.meugas.app/catalog/",
+        "REACT_APP_URL_MS_ORDER": "https://api.meugas.app/order/",
+        "REACT_APP_URL_MS_REPUTATION": "https://api.meugas.app/reputation/",
+        "REACT_APP_URL_MS_OFFER": "https://api.meugas.app/offer/",
+        "REACT_APP_URL_MS_BILLING": "https://api.meugas.app/billing/",
+        "REACT_APP_URL_MS_LOGISTICS": "https://api.meugas.app/logistics/",
+        "REACT_APP_URL_MS_STORAGE": "https://storage.meugas.app/",
+        "REACT_APP_GOOGLE_MAPS_API_KEY": "AIzaSyBE6DAC_cTig1BpLd70SP6p6kXAObMnMpA",
+        "REACT_APP_PAGSEGURO_PUBLIC_KEY": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzjnV4Vsqu9TZ3CuecedAbTDNezfT6zacW0aHtSFcs1gX/IKk7wgBelq70/p3WbA7Ynz3jM9LOGplbVxrh3hkdY9vCBSS/GTQVumrVLJL/1P3ot8EKWayX5k8AMeD145vsgdYEJsPcxG3URAHA8UjCd4ljNKehzXGUddgoobnM5gErE4YBWd/f+DLTlwpFyrrf5O/PsQgCMPnC4PQtYYo5KSZsZ55Y4tfZms2/ltrruU7J4vgsWNuAMCwwG8FBL2Aru5yRpdZhhBULF+p/pdZt+njjgX4LsV7/sgfwOK33T3FC9tATYZVe0y+rdwmcyDqhRhNP4eQnHlwDCQBOxkmFQIDAQAB",
+        "REACT_APP_PAGSEGURO_TOKEN": "Bearer 6cb801e5-83d2-4f87-81af-834d77e956b9b8d910254a67a1c70cc8d163c5065306b57d-8755-484a-884d-06204bb1b0e2",
+        "REACT_APP_URL_PAGSEGURO_CHECKOUT_SESSION": "https://sdk.pagseguro.com/checkout-sdk/sessions"
+      }
     },
     "qa": {
       "distribution": "internal",
@@ -19,7 +36,24 @@
         "buildType": "apk"
       },
       "ios": {},
-      "channel": "qa"
+      "channel": "qa",
+      "env": {
+        "REACT_APP_URL_MS_AUTH": "https://api.meugas.app/authentication/",
+        "REACT_APP_URL_MS_COMM": "https://api.meugas.app/communication/",
+        "REACT_APP_URL_MS_CONSUMER": "https://api.meugas.app/consumer/",
+        "REACT_APP_URL_MS_PARTNER": "https://api.meugas.app/partner/",
+        "REACT_APP_URL_MS_CATALOG": "https://api.meugas.app/catalog/",
+        "REACT_APP_URL_MS_ORDER": "https://api.meugas.app/order/",
+        "REACT_APP_URL_MS_REPUTATION": "https://api.meugas.app/reputation/",
+        "REACT_APP_URL_MS_OFFER": "https://api.meugas.app/offer/",
+        "REACT_APP_URL_MS_BILLING": "https://api.meugas.app/billing/",
+        "REACT_APP_URL_MS_LOGISTICS": "https://api.meugas.app/logistics/",
+        "REACT_APP_URL_MS_STORAGE": "https://storage.meugas.app/",
+        "REACT_APP_GOOGLE_MAPS_API_KEY": "AIzaSyBE6DAC_cTig1BpLd70SP6p6kXAObMnMpA",
+        "REACT_APP_PAGSEGURO_PUBLIC_KEY": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzjnV4Vsqu9TZ3CuecedAbTDNezfT6zacW0aHtSFcs1gX/IKk7wgBelq70/p3WbA7Ynz3jM9LOGplbVxrh3hkdY9vCBSS/GTQVumrVLJL/1P3ot8EKWayX5k8AMeD145vsgdYEJsPcxG3URAHA8UjCd4ljNKehzXGUddgoobnM5gErE4YBWd/f+DLTlwpFyrrf5O/PsQgCMPnC4PQtYYo5KSZsZ55Y4tfZms2/ltrruU7J4vgsWNuAMCwwG8FBL2Aru5yRpdZhhBULF+p/pdZt+njjgX4LsV7/sgfwOK33T3FC9tATYZVe0y+rdwmcyDqhRhNP4eQnHlwDCQBOxkmFQIDAQAB",
+        "REACT_APP_PAGSEGURO_TOKEN": "Bearer 6cb801e5-83d2-4f87-81af-834d77e956b9b8d910254a67a1c70cc8d163c5065306b57d-8755-484a-884d-06204bb1b0e2",
+        "REACT_APP_URL_PAGSEGURO_CHECKOUT_SESSION": "https://sdk.pagseguro.com/checkout-sdk/sessions"
+      }
     },
     "preview": {
       "developmentClient": true,
@@ -28,7 +62,24 @@
         "buildType": "apk"
       },
       "ios": {},
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "REACT_APP_URL_MS_AUTH": "https://api.meugas.app/authentication/",
+        "REACT_APP_URL_MS_COMM": "https://api.meugas.app/communication/",
+        "REACT_APP_URL_MS_CONSUMER": "https://api.meugas.app/consumer/",
+        "REACT_APP_URL_MS_PARTNER": "https://api.meugas.app/partner/",
+        "REACT_APP_URL_MS_CATALOG": "https://api.meugas.app/catalog/",
+        "REACT_APP_URL_MS_ORDER": "https://api.meugas.app/order/",
+        "REACT_APP_URL_MS_REPUTATION": "https://api.meugas.app/reputation/",
+        "REACT_APP_URL_MS_OFFER": "https://api.meugas.app/offer/",
+        "REACT_APP_URL_MS_BILLING": "https://api.meugas.app/billing/",
+        "REACT_APP_URL_MS_LOGISTICS": "https://api.meugas.app/logistics/",
+        "REACT_APP_URL_MS_STORAGE": "https://storage.meugas.app/",
+        "REACT_APP_GOOGLE_MAPS_API_KEY": "AIzaSyBE6DAC_cTig1BpLd70SP6p6kXAObMnMpA",
+        "REACT_APP_PAGSEGURO_PUBLIC_KEY": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzjnV4Vsqu9TZ3CuecedAbTDNezfT6zacW0aHtSFcs1gX/IKk7wgBelq70/p3WbA7Ynz3jM9LOGplbVxrh3hkdY9vCBSS/GTQVumrVLJL/1P3ot8EKWayX5k8AMeD145vsgdYEJsPcxG3URAHA8UjCd4ljNKehzXGUddgoobnM5gErE4YBWd/f+DLTlwpFyrrf5O/PsQgCMPnC4PQtYYo5KSZsZ55Y4tfZms2/ltrruU7J4vgsWNuAMCwwG8FBL2Aru5yRpdZhhBULF+p/pdZt+njjgX4LsV7/sgfwOK33T3FC9tATYZVe0y+rdwmcyDqhRhNP4eQnHlwDCQBOxkmFQIDAQAB",
+        "REACT_APP_PAGSEGURO_TOKEN": "Bearer 6cb801e5-83d2-4f87-81af-834d77e956b9b8d910254a67a1c70cc8d163c5065306b57d-8755-484a-884d-06204bb1b0e2",
+        "REACT_APP_URL_PAGSEGURO_CHECKOUT_SESSION": "https://sdk.pagseguro.com/checkout-sdk/sessions"
+      }
     },
     "production": {
       "developmentClient": false,
@@ -36,7 +87,24 @@
         "buildType": "apk"
       },
       "ios": {},
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "REACT_APP_URL_MS_AUTH": "https://api.meugas.app/authentication/",
+        "REACT_APP_URL_MS_COMM": "https://api.meugas.app/communication/",
+        "REACT_APP_URL_MS_CONSUMER": "https://api.meugas.app/consumer/",
+        "REACT_APP_URL_MS_PARTNER": "https://api.meugas.app/partner/",
+        "REACT_APP_URL_MS_CATALOG": "https://api.meugas.app/catalog/",
+        "REACT_APP_URL_MS_ORDER": "https://api.meugas.app/order/",
+        "REACT_APP_URL_MS_REPUTATION": "https://api.meugas.app/reputation/",
+        "REACT_APP_URL_MS_OFFER": "https://api.meugas.app/offer/",
+        "REACT_APP_URL_MS_BILLING": "https://api.meugas.app/billing/",
+        "REACT_APP_URL_MS_LOGISTICS": "https://api.meugas.app/logistics/",
+        "REACT_APP_URL_MS_STORAGE": "https://storage.meugas.app/",
+        "REACT_APP_GOOGLE_MAPS_API_KEY": "AIzaSyBE6DAC_cTig1BpLd70SP6p6kXAObMnMpA",
+        "REACT_APP_PAGSEGURO_PUBLIC_KEY": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzjnV4Vsqu9TZ3CuecedAbTDNezfT6zacW0aHtSFcs1gX/IKk7wgBelq70/p3WbA7Ynz3jM9LOGplbVxrh3hkdY9vCBSS/GTQVumrVLJL/1P3ot8EKWayX5k8AMeD145vsgdYEJsPcxG3URAHA8UjCd4ljNKehzXGUddgoobnM5gErE4YBWd/f+DLTlwpFyrrf5O/PsQgCMPnC4PQtYYo5KSZsZ55Y4tfZms2/ltrruU7J4vgsWNuAMCwwG8FBL2Aru5yRpdZhhBULF+p/pdZt+njjgX4LsV7/sgfwOK33T3FC9tATYZVe0y+rdwmcyDqhRhNP4eQnHlwDCQBOxkmFQIDAQAB",
+        "REACT_APP_PAGSEGURO_TOKEN": "Bearer 6cb801e5-83d2-4f87-81af-834d77e956b9b8d910254a67a1c70cc8d163c5065306b57d-8755-484a-884d-06204bb1b0e2",
+        "REACT_APP_URL_PAGSEGURO_CHECKOUT_SESSION": "https://sdk.pagseguro.com/checkout-sdk/sessions"
+      }
     }
   },
   "submit": {

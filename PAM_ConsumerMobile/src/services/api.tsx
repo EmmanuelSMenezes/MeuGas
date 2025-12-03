@@ -4,7 +4,7 @@ import { REACT_APP_URL_MS_AUTH } from "@env";
 import { navigate } from "../routes/rootNavigation";
 
 const api = axios.create({
-  timeout: 2000,
+  timeout: 30000,
 });
 
 api.interceptors.request.use(
